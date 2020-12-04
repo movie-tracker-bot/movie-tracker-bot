@@ -20,7 +20,7 @@ Technologies:
 * 
 
 ## Team
-- Amanda 
+- Amanda Cupertino
 - Daniel Miranda
 - Francielly Neves
 - Gabriel Bastos
