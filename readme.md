@@ -15,12 +15,15 @@ Features:
 * Pick random movie from the list
 
 Technologies:
-* Telegram bot API
-* 
-* 
+* Telegram's bot API
+* Node.js
+* SQLite
 
 ## Team
+
 - Amanda Cupertino
 - Daniel Miranda
 - Francielly Neves
 - Gabriel Bastos
+
+Three development sprints.
