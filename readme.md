@@ -5,7 +5,7 @@ pretends to watch.
 
 ## Scope
 
-Objective:
+Objective: Assist the user to keep track of movies
 
 Features:
 * Integrate with IMDB's movie database
