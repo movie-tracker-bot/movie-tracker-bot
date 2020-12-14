@@ -1,0 +1,28 @@
+{
+	"name": "movie-tracker-bot",
+	"version": "0.1.0",
+	"description": "Keeps track of your movie list.",
+	"main": "src/index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/movie-tracker-bot/movie-tracker-bot.git"
+	},
+	"keywords": [
+		"telegram",
+		"bot",
+		"movie",
+		"movies"
+	],
+	"author": "movie tracker bot team",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/movie-tracker-bot/movie-tracker-bot/issues"
+	},
+	"homepage": "https://github.com/movie-tracker-bot/movie-tracker-bot#readme",
+	"dependencies": {
+		"telegraf": "^3.38.0"
+	}
+}
