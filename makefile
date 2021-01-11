@@ -5,3 +5,6 @@ image:
 
 run:
 	docker run --rm -ti -v ${PWD}/:/usr/src/movie-tracker-bot/ -e BOT_TOKEN=$(BOT_TOKEN) movie-tracker-bot:latest
+
+shell:
+	docker run --rm -ti -v ${PWD}/:/usr/src/movie-tracker-bot/ -e BOT_TOKEN=$(BOT_TOKEN) movie-tracker-bot:latest sh
