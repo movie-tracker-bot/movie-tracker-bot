@@ -1,6 +1,31 @@
+const endpoints = require('../endpoints');
+
+
 test(
-	'adds 1 + 2 to equal 3',
+	'test add endpoint pattern',
 	() => {
-		expect(1 + 2).toBe(3);
+		const { pattern, handler } = endpoints.handlers.add;
+
+		const shouldMatch = [
+			'add movie',
+			'Add movie',
+			'AdD very long movie name with too many words',
+		];
+
+		const shouldNotMatch = [
+			'addmovie',
+			'Addmovie',
+			' Add with leading space',
+			'ad movie',
+			'addd movie',
+		];
+
+		for (let input of shouldMatch) {
+			expect(pattern.test(input)).toBeTruthy();
+		}
+
+		for (let input of shouldNotMatch) {
+			expect(pattern.test(input)).toBeFalsy();
+		}
 	}
 );
