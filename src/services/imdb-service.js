@@ -16,7 +16,7 @@ class ImdbService {
             })
             return response.data.data
         } catch (err) {
-            Log.warn('Erro ao recuperar o nome do filme')
+            console.log('Erro ao recuperar o nome do filme')
             return null
         }
     }
@@ -35,7 +35,7 @@ class ImdbService {
             })
             return response.data.data
         } catch (err) {
-            Log.warn('Erro ao recuperar os dados detalhados do filme')
+            console.log('Erro ao recuperar os dados detalhados do filme')
             return null
         }
     }
