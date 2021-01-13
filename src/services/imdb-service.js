@@ -14,7 +14,7 @@ class ImdbService {
                     'x-rapidapi-host': 'imdb8.p.rapidapi.com'
                 }
             })
-            return response.data.data
+            return response.data.results
         } catch (err) {
             console.log('Erro ao recuperar o nome do filme')
             return null
@@ -33,7 +33,7 @@ class ImdbService {
                     'x-rapidapi-host': 'imdb8.p.rapidapi.com'
                 }
             })
-            return response.data.data
+            return response.data.results
         } catch (err) {
             console.log('Erro ao recuperar os dados detalhados do filme')
             return null
