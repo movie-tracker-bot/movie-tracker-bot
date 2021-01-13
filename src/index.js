@@ -1,8 +1,8 @@
 const telegram = require('./telegram');
-const endpoints = require('./endpoints');
+const BotHandler = require('./handlers/bot-handler');
 
 
-telegram.register(endpoints.handlers);
+telegram.register(BotHandler.handlers);
 
 // Handle ctrl-c.
 process.on(

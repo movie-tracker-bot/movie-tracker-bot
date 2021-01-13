@@ -1,10 +1,10 @@
-const endpoints = require('../endpoints');
+const BotHandler = require('../handlers/bot-handler');
 
 
 test(
 	'test add endpoint pattern',
 	() => {
-		const { pattern, handler } = endpoints.handlers.add;
+		const { pattern, handler } = BotHandler.handlers.add;
 
 		const shouldMatch = [
 			'add movie',
