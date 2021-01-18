@@ -24,6 +24,8 @@
 	"homepage": "https://github.com/movie-tracker-bot/movie-tracker-bot#readme",
 	"dependencies": {
 		"axios": "^0.21.1",
+		"sqlite": "^4.0.19",
+		"sqlite3": "^5.0.1",
 		"telegraf": "^3.38.0"
 	},
 	"devDependencies": {
