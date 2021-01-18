@@ -22,9 +22,7 @@ class BotHandler {
 
         console.log(`Add command: ${query}`);
 
-        const imdbService = new ImdbService();
-
-        const results = await imdbService.getMovieByTitle(query);
+        const results = await ImdbService.getMovieByTitle(query);
 
         const movie = results[0];
 
