@@ -1,8 +1,7 @@
 const axios = require('axios')
 
 class ImdbService {
-
-    async getMovieByTitle(title) {
+    static async getMovieByTitle(title) {
         try {
             let response = await axios.get('https://imdb8.p.rapidapi.com/title/find', {
                 params: {
@@ -21,7 +20,7 @@ class ImdbService {
         }
     }
 
-    async getMovieDetails(id) {
+    static async getMovieDetails(id) {
         try {
             let response = await axios.get('https://imdb8.p.rapidapi.com/title/get-details', {
                 params: {
