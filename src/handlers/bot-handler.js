@@ -17,14 +17,14 @@ class BotHandler {
         const handlers = {
             add: {
                 pattern: /^add (.*)$/i,
-                handler: BotHandler.addMovie,
+                handler: this.addMovie,
             },
         };
 
         for (let endpoint of Object.values(handlers)) {
             this.telegraf.hears(
                 endpoint.pattern,
-                endpoint.handler
+                endpoint.handler.bind(this)
             );
             console.log(`Registering handler for ${endpoint.pattern}`);
         }
@@ -66,20 +66,79 @@ class BotHandler {
         }
     }
 
-    static async addMovie(ctx) {
+
+    static async askMovieConfirmation(ctx, state) {
+        const movie = state.movie_list[state.movie_ix];
+
+        if (movie.title) {
+            await ctx.reply(movie.title);
+        }
+
+        if (movie.image) {
+            await ctx.replyWithPhoto(movie.image.url);
+        }
+
+        await ctx.reply('Is this the correct movie?');
+    }
+
+    async addMovie(ctx, next) {
+        const user = ctx.from.id;
+
+        if (this.state[user]) { // Previous action is still ongoing.
+            await next();
+            return;
+        }
+
         const query = ctx.match[1];
 
         console.log(`Add command: ${query}`);
 
-        const results = await ImdbService.getMovieByTitle(query);
+        const state = this.state[user] = {
+            movie_ix: 0,
+            movie_list: await ImdbService.getMovieByTitle(query),
+        };
 
-        const movie = results[0];
+        BotHandler.askMovieConfirmation(ctx, state);
 
-        await ctx.reply(movie.title);
-        if (movie.image) {
-            await ctx.replyWithPhoto(movie.image.url);
+        state.next = this.confirmMovie.bind(this);
+    }
+
+
+    async confirmMovie(ctx) {
+        const user = ctx.from.id;
+
+        const message = ctx.message.text;
+
+        console.log(`Got confirmation message: ${message}`);
+
+        const positive_answer = /^(yes+|yep|yeah)$/i;
+        const negative_answer = /^(no+|nope|nah)$/i;
+        const cancel_answer = /^(cancel)$/i;
+
+        if (positive_answer.test(message)) {
+            // TODO: add to DB.
+            await ctx.reply('Got it!');
+            delete this.state[user];
         }
-        await ctx.reply('Is this the correct movie?');
+        else if (negative_answer.test(message)) {
+            const state = this.state[user];
+            state.movie_ix++;
+
+            if (state.movie_list.length == state.movie_ix) {
+                await ctx.reply("Well, I ain't got any other suggestions...");
+                delete this.state[user];
+            }
+            else {
+                BotHandler.askMovieConfirmation(ctx, state);
+            }
+        }
+        else if (cancel_answer.test(message)) {
+            await ctx.reply('Cancelling...');
+            delete this.state[user];
+        }
+        else {
+            await ctx.reply("I don't get it, sorry :s");
+        }
     }
 
 
