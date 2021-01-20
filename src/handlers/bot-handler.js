@@ -10,6 +10,8 @@ class BotHandler {
     constructor(telegraf) {
         this.telegraf = telegraf;
 
+        this.state = {};
+
         this.telegraf.start(BotHandler.start);
 
         const handlers = {
@@ -27,6 +29,10 @@ class BotHandler {
             console.log(`Registering handler for ${endpoint.pattern}`);
         }
 
+        this.telegraf.on(
+            'text',
+            this.text.bind(this)
+        );
     }
 
 
@@ -44,6 +50,21 @@ class BotHandler {
         await ctx.replyWithMarkdown(welcomeMessage);
     }
 
+
+    async text(ctx) {
+        console.log(`text handler: ${ctx.message.text}`);
+
+        const user = ctx.from.id;
+
+        if (this.state[user]) {
+            console.log('Dispatching to state handler...');
+            await this.state[user].next(ctx);
+        }
+        else {
+            console.log('No state for current user.');
+            await ctx.reply("Sorry, I don't understand.");
+        }
+    }
 
     static async addMovie(ctx) {
         const query = ctx.match[1];
