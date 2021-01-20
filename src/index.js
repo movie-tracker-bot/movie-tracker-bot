@@ -1,16 +1,21 @@
-const telegram = require('./telegram');
+const { Telegraf } = require('telegraf');
 const BotHandler = require('./handlers/bot-handler');
 
 
-telegram.register(BotHandler.handlers);
+// Bot definition.
+const bot = new BotHandler(
+    new Telegraf(process.env.BOT_TOKEN)
+);
+
 
 // Handle ctrl-c.
 process.on(
-	'SIGINT',
-	async () => {
-		await telegram.stop();
-		process.exit(130);
-	}
+    'SIGINT',
+    async () => {
+        await bot.stop();
+        process.exit(130);
+    }
 );
 
-telegram.launch();
+
+bot.launch();
