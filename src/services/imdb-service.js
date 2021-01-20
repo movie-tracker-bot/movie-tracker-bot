@@ -13,7 +13,9 @@ class ImdbService {
                     'x-rapidapi-host': 'imdb8.p.rapidapi.com'
                 }
             })
-            return response.data.results
+            return response.data.results.filter( // Remove movies with empty title.
+                movie => movie.title
+            );
         } catch (err) {
             console.log('Erro ao recuperar o nome do filme')
             return null
