@@ -1,4 +1,5 @@
 const ImdbService = require('../services/imdb-service');
+const Movie = require('../models/movie');
 
 class BotHandler {
     /**
@@ -119,7 +120,12 @@ class BotHandler {
         const cancel_answer = /^(cancel)$/i;
 
         if (positive_answer.test(message)) {
-            // TODO: add to DB.
+            const state = this.state[user];
+            const movie = state.movie_list[state.movie_ix];
+
+            const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image?.url);
+            movieDAO.save();
+
             await ctx.reply('Got it!');
             delete this.state[user];
         }
