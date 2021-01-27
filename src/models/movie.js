@@ -3,10 +3,10 @@ const Genre = require('./genre')
 class Movie{
     /**
      * @param {number} id - assingned by database
-     * @param {string} imdb_id 
-     * @param {string} title 
-     * @param {number} year 
-     * @param {string} poster_url 
+     * @param {string} imdb_id
+     * @param {string} title
+     * @param {number} year
+     * @param {string} poster_url
      */
     constructor(id=null,imdb_id,title,year=null,poster_url=null){
         this.id = id
@@ -29,8 +29,8 @@ class Movie{
         }
     }
     /**
-     * 
-     * @param {string[]} genreNames 
+     *
+     * @param {string[]} genreNames
      */
     async saveGenres(genreNames){
         this.genres = []
@@ -55,7 +55,7 @@ class Movie{
     }
 
     /**
-     * @param {string} imdb_id 
+     * @param {string} imdb_id
      */
     static async findByImdbId(imdb_id){
         try{
@@ -71,10 +71,10 @@ class Movie{
         }catch(err){
             console.log("Error on retrieving movie")
             return null
-        }  
+        }
     }
     /**
-     * @param {number} id 
+     * @param {number} id
      */
     static async findById(id){
         try{
@@ -90,7 +90,7 @@ class Movie{
         }catch(err){
             console.log("Error on retrieving movie")
             return null
-        }  
+        }
     }
 }
 
@@ -126,7 +126,7 @@ class MovieGenreRelation{
         }catch(err){
             console.log("Error on retrieving genre")
             return null
-        }  
+        }
     }
 }
 

@@ -1,18 +1,32 @@
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const sqlite = require('sqlite');
+
+
 class Database{
+    static filename = './database/movie_tracker_bot.db';
+
     /**
      * Retorna um objeto Database para fazer operações no banco de dados
      */
-    static async getDatabase(){
-        return await sqlite.open({ filename:'./database/movie_tracker_bot.db', driver: sqlite3.Database })
+    static async getDatabase() {
+        return await sqlite.open({ filename:Database.filename, driver: sqlite3.Database })
+    }
+
+    /**
+     * Inicializa o banco, criando-o caso necessário.
+     */
+    static init() {
+        if (!fs.existsSync(Database.filename)) {
+            Database.createTables();
+        }
     }
 
     /**
     Cria as tabelas e configura o banco de dados, se ele ainda não foi configurado
      */
-    static createTables(){
-        const db = new sqlite3.Database('./database/movie_tracker_bot.db')
+    static createTables() {
+        const db = new sqlite3.Database(Database.filename)
         db.serialize(()=>{
             db.run("PRAGMA foreign_keys = ON;",(err)=>{
                 if (err){
@@ -21,7 +35,7 @@ class Database{
                 }
             })
             .run(`CREATE TABLE IF NOT EXISTS user(
-                    telegram_id INTEGER PRIMARY KEY, 
+                    telegram_id INTEGER PRIMARY KEY,
                     first_name TEXT NOT NULL);`,
             (err)=>{
                 if (err){
@@ -75,7 +89,7 @@ class Database{
                     throw Error("An error occurred while creating the 'user_movie' table")
                 }
             })
-        })     
+        })
     }
 }
 module.exports=Database

@@ -1,5 +1,9 @@
 const { Telegraf } = require('telegraf');
+const Database = require('./models/database');
 const BotHandler = require('./handlers/bot-handler');
+
+
+Database.init();
 
 
 // Bot definition.
