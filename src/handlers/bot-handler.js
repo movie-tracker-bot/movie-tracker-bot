@@ -71,20 +71,6 @@ class BotHandler {
     }
 
 
-    static async askMovieConfirmation(ctx, state) {
-        const movie = state.movie_list[state.movie_ix];
-
-        if (movie.title) {
-            await ctx.reply(movie.title);
-        }
-
-        if (movie.image) {
-            await ctx.replyWithPhoto(movie.image.url);
-        }
-
-        await ctx.reply('Is this the correct movie?');
-    }
-
     async addMovie(ctx, next) {
         const user = ctx.from.id;
 
@@ -104,49 +90,86 @@ class BotHandler {
 
         BotHandler.askMovieConfirmation(ctx, state);
 
-        state.next = this.confirmMovie.bind(this);
+        state.next = this.confirm.bind(
+            this,
+
+            async (ctx, state) => {
+                const movie = state.movie_list[state.movie_ix];
+
+                const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image?.url);
+                movieDAO.save();
+
+                await ctx.reply('Got it!');
+
+                return true;
+            },
+
+            async (ctx, state) => {
+                state.movie_ix++;
+
+                if (state.movie_list.length == state.movie_ix) {
+                    await ctx.reply("Well, I ain't got any other suggestions...");
+                    return true;
+                }
+                else {
+                    BotHandler.askMovieConfirmation(ctx, state);
+                    return false;
+                }
+            },
+
+            async (ctx, state) => {
+                await ctx.reply('Cancelling...');
+                return true;
+            }
+        );
     }
 
 
-    async confirmMovie(ctx) {
+    static async askMovieConfirmation(ctx, state) {
+        const movie = state.movie_list[state.movie_ix];
+
+        if (movie.title) {
+            await ctx.reply(movie.title);
+        }
+
+        if (movie.image) {
+            await ctx.replyWithPhoto(movie.image.url);
+        }
+
+        await ctx.reply('Is this the correct movie?');
+    }
+
+
+    async confirm(positive, negative, cancel, ctx) {
         const user = ctx.from.id;
 
         const message = ctx.message.text;
 
         console.log(`Got confirmation message: ${message}`);
 
-        const positive_answer = /^(yes+|yep|yeah)$/i;
-        const negative_answer = /^(no+|nope|nah)$/i;
-        const cancel_answer = /^(cancel)$/i;
+        const positive_answer = /^(yes+|yep|yeah|y)$/i;
+        const negative_answer = /^(no+|nope|nah|n)$/i;
+        const cancel_answer = /^(cancel|nvm|forget it)$/i;
+
+        const state = this.state[user];
+
+        let done = false;
 
         if (positive_answer.test(message)) {
-            const state = this.state[user];
-            const movie = state.movie_list[state.movie_ix];
-
-            const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image?.url);
-            movieDAO.save();
-
-            await ctx.reply('Got it!');
-            delete this.state[user];
+            done = await positive(ctx, state);
         }
         else if (negative_answer.test(message)) {
-            const state = this.state[user];
-            state.movie_ix++;
-
-            if (state.movie_list.length == state.movie_ix) {
-                await ctx.reply("Well, I ain't got any other suggestions...");
-                delete this.state[user];
-            }
-            else {
-                BotHandler.askMovieConfirmation(ctx, state);
-            }
+            done = await negative(ctx, state);
         }
         else if (cancel_answer.test(message)) {
-            await ctx.reply('Cancelling...');
-            delete this.state[user];
+            done = await cancel(ctx, state);
         }
         else {
-            await ctx.reply("I don't get it, sorry :s");
+            await ctx.reply("Come again?");
+        }
+
+        if (done) {
+            delete this.state[user];
         }
     }
 
