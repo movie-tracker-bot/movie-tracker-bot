@@ -40,10 +40,10 @@ class BotHandler {
 
     static async start(ctx) {
         const welcomeMessage = [
-            [ 'Bem vindo ao movie tracker, o melhor assistente de filmes do telegram,',
-              'nele você poderá gerenciar sua lista de filmes que quer assistir,',
-              'obter recomendações que melhor se adequa ao seu gosto.',
-              'Para isso temos os seguintes comandos:' ].join(' '),
+            [ 'Olá', ctx.from.first_name, '!Bem vindo ao movie tracker, o melhor',
+              'assistente de filmes do telegram, nele você poderá gerenciar sua lista de',
+              'filmes que quer assistir, obter recomendações que melhor se adequa ao seu',
+              'gosto. Para isso temos os seguintes comandos:' ].join(' '),
             '- **add** seguido do nome do um filme que queira adicionar  a sua lista',
             '- **remove** seguido do nome do filme que deseja remover da sua lista',
             '- **score** seguido do nome do filme  e a avaliação que gostaria de dar para ele.',
@@ -136,9 +136,7 @@ class BotHandler {
     static async askMovieConfirmation(ctx, state) {
         const movie = state.movie_list[state.movie_ix];
 
-        if (movie.title) {
-            await ctx.reply(movie.title);
-        }
+        await ctx.reply(movie.title);
 
         if (movie.image) {
             await ctx.replyWithPhoto(movie.image.url);
@@ -163,17 +161,23 @@ class BotHandler {
 
         let done = false;
 
-        if (positive_answer.test(message)) {
-            done = await positive(ctx, state);
-        }
-        else if (negative_answer.test(message)) {
-            done = await negative(ctx, state);
-        }
-        else if (cancel_answer.test(message)) {
-            done = await cancel(ctx, state);
-        }
-        else {
-            await ctx.reply("Come again?");
+        switch (true) {
+            case positive_answer.test(message):
+                done = await positive(ctx, state);
+                break;
+
+            case negative_answer.test(message):
+                done = await negative(ctx, state);
+                break;
+
+            case cancel_answer.test(message):
+                done = await cancel(ctx, state);
+                break;
+
+            default:
+                await ctx.reply("Come again?");
+                done = false;
+                break;
         }
 
         if (done) {

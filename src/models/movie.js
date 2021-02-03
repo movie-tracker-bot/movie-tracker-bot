@@ -24,8 +24,13 @@ class Movie{
             let movie = await Movie.findByImdbId(this.imdb_id)
             this.id = movie.id
         } catch (err) {
-            console.log(err)
-            console.log("Error while saving movie")
+            if (err.code === 'SQLITE_CONSTRAINT') {
+                console.log('Movie already exists.');
+            }
+            else {
+                console.log(err)
+                console.log("Error while saving movie")
+            }
         }
     }
     /**
