@@ -1,5 +1,6 @@
 const ImdbService = require('../services/imdb-service');
 const Movie = require('../models/movie');
+const User = require('../models/user');
 
 class BotHandler {
     /**
@@ -51,7 +52,12 @@ class BotHandler {
             '- **rand** seguido de um gênero ou nome de um artista, para obter uma recomendação com uma característica específica.',
             '- **myRank**  para visualizar a lista de avaliações já feitas.'
         ].join('\n');
+
         await ctx.replyWithMarkdown(welcomeMessage);
+
+        let user = new User(ctx.from.id, ctx.from.username);
+
+        user.save();
     }
 
 
@@ -98,6 +104,8 @@ class BotHandler {
 
                 const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image?.url);
                 movieDAO.save();
+
+                // TODO: associate movie to user.
 
                 await ctx.reply('Got it!');
 

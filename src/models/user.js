@@ -17,7 +17,7 @@ class User{
             db.close()
         } catch (err) {
             console.log(err)
-            console.log("Error while saving user")
+            console.log("Error while saving user, problably already exists")
         }
     }
     /**
