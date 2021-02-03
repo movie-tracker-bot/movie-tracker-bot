@@ -21,6 +21,10 @@ class BotHandler {
                 pattern: /^add (.*)$/i,
                 handler: this.addMovie,
             },
+            rand: {
+                pattern: /^rand$/i,
+                handler: this.randMovie,
+            },
         };
 
         for (let endpoint of Object.values(handlers)) {
@@ -183,6 +187,28 @@ class BotHandler {
         if (done) {
             delete this.state[user];
         }
+    }
+
+
+    async randMovie(ctx, next) {
+        const user = ctx.from.id;
+
+        if (this.state[user]) { // Previous action is still ongoing.
+            await next();
+            return;
+        }
+
+        console.log(`Rand command`);
+
+        const movie; // TODO: Get random movie.
+
+        await ctx.reply(movie.title);
+
+        if (movie.poster_url) {
+            await ctx.replyWithPhoto(movie.poster_url);
+        }
+
+        await ctx.reply('Have a nice movie :)');
     }
 
 
