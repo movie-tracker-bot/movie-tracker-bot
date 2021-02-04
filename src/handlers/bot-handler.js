@@ -107,7 +107,7 @@ class BotHandler {
                 const movie = state.movie_list[state.movie_ix];
 
                 const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image?.url);
-                movieDAO.save();
+                movieDAO.createIfDoesntExist();
 
                 // TODO: associate movie to user.
 

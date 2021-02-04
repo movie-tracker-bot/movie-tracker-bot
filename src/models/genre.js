@@ -8,13 +8,28 @@ class Genre{
         this.id = id
         this.name = name
     }
+
+    async createIfDoesntExist(){
+        try{
+            var existing_genre = await Genre.findByName(this.name)
+            if(!existing_genre){
+                await this.save()
+            }
+            else{
+                this.id = existing_genre.id
+            }
+        }catch(err){
+            console.log(err)
+        }
+    }
+
     async save(){
         try {
             const db = await Database.getDatabase()
             await db.run(`INSERT INTO genre(name)
                     VALUES (?)`,[this.name])
             db.close()
-            let genre = await this.findByName(this.name)
+            let genre = await Genre.findByName(this.name)
             this.id = genre.id
         } catch (err) {
             console.log(err)

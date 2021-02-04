@@ -1,5 +1,7 @@
+const { TestScheduler } = require('jest')
 const Database = require('./database')
 const Genre = require('./genre')
+const MovieGenreList = require('./movie-genre-list')
 class Movie{
     /**
      * @param {number} id - assingned by database
@@ -14,6 +16,27 @@ class Movie{
         this.title = title
         this.year = year
         this.poster_url = poster_url
+        this.genreList = null
+    }
+    async createIfDoesntExist(){
+        try{
+            let existing_movie = await Movie.findByImdbId(this.imdb_id)
+            
+            if(!existing_movie){
+                await this.save()
+            }
+            else{
+                this.id = existing_movie.id
+                this.title = existing_movie.title
+                this.year = existing_movie.year
+                this.poster_url = existing_movie.poster_url
+                this.genreList = existing_movie.genreList
+                console.log(existing_movie)
+            }
+        }catch(err){
+            console.log(err)
+            console.log("error while creating movie")
+        }
     }
     async save(){
         try {
@@ -23,6 +46,7 @@ class Movie{
             db.close()
             let movie = await Movie.findByImdbId(this.imdb_id)
             this.id = movie.id
+            this.genreList = new MovieGenreList(this.id)
         } catch (err) {
             if (err.code === 'SQLITE_CONSTRAINT') {
                 console.log('Movie already exists.');
@@ -34,32 +58,6 @@ class Movie{
         }
     }
     /**
-     *
-     * @param {string[]} genreNames
-     */
-    async saveGenres(genreNames){
-        this.genres = []
-        genreNames.forEach((genreName)=>{
-            let genre = Genre.findByName(genreName)
-            if(!genre){
-                genre = new Genre(null,genreName)
-                genre.save()
-            }
-            relation = new MovieGenreRelation(this.id, genre.id)
-            relation.save()
-            this.genres.push(genre)
-        })
-    }
-    /**
-     * Encontra generos do filme, retorna vetor de Genre e
-     * também atribui esse vetor ao atributo genres
-     */
-    async findGenres(){
-        this.genres =  await MovieGenreRelation.findByMovieId(this.id)
-        return this.genres
-    }
-
-    /**
      * @param {string} imdb_id
      */
     static async findByImdbId(imdb_id){
@@ -69,11 +67,12 @@ class Movie{
             var movie = null
             if (result){
                 movie = new Movie(result.id,result.imdb_id,result.title,result.year,result.poster_url)
-                await movie.findGenres()
+                await movie.fillGenreList()
             }
             db.close()
             return movie
         }catch(err){
+            console.log(err)
             console.log("Error on retrieving movie")
             return null
         }
@@ -88,7 +87,7 @@ class Movie{
             var movie = null
             if (result){
                 movie = new Movie(result.id,result.imdb_id,result.title,result.year,result.poster_url)
-                await movie.findGenres()
+                await movie.fillGenreList()
             }
             db.close()
             return movie
@@ -97,41 +96,9 @@ class Movie{
             return null
         }
     }
-}
-
-class MovieGenreRelation{
-    constructor(movie_id, genre_id){
-        this.movie_id = movie_id
-        this.genre_id = genre_id
-    }
-    async save(){
-        try {
-            const db = await Database.getDatabase()
-            await db.run(`INSERT INTO movie_genre(movie_id, genre_id)
-                    VALUES (?, ?)`,[this.movie_id, this.genre_id])
-            db.close()
-        } catch (err) {
-            console.log(err)
-            console.log("Error while saving relationship between movie and genre")
-        }
-    }
-    static async findByMovieId(movie_id){
-        try{
-            const db = await Database.getDatabase()
-            let results = await db.all(`SELECT * FROM movie_genre WHERE movie_id = ?`,[movie_id])
-            var genres = []
-            if (Array.isArray(results)){
-                results.forEach((result)=>{
-                    let genre = Genre.findById(result.genre_id)
-                    genres.push(genre)
-                })
-            }
-            db.close()
-            return genres
-        }catch(err){
-            console.log("Error on retrieving genre")
-            return null
-        }
+     async fillGenreList(){
+        this.genreList = new MovieGenreList(this.id)
+        await this.genreList.getGenres()
     }
 }
 
