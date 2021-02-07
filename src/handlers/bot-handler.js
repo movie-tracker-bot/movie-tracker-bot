@@ -25,10 +25,6 @@ class BotHandler {
                 pattern: /^rand$/i,
                 handler: this.randMovie,
             },
-            start: {
-                pattern: /^start$/i,
-                handler: this.start,
-            },
         };
 
         for (let endpoint of Object.values(this.handlers)) {
