@@ -1,4 +1,4 @@
-import movies from ('./movies.json');
+const movies = require('./movies.json');
 
 
 class ImdbService {

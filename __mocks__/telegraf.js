@@ -37,7 +37,7 @@ class Context {
 
 class Telegraf {
     constructor(token) {
-        this.on_patterns = {};
+        this.on_patterns = [];
         this.running = false;
     }
 
@@ -54,7 +54,7 @@ class Telegraf {
         if (this.running)
             throw new Error('Attempt to register action while running!');
 
-        this.on_patterns[pattern] = handler;
+        this.on_patterns.push([pattern, handler]);
     }
 
 
@@ -99,8 +99,8 @@ class Telegraf {
 
 
     async sendMessage(message) {
-        for (const [pattern, handler] of Object.entries(this.on_patterns)) {
-            let matches = pattern.match(message);
+        for (const [pattern, handler] of this.on_patterns) {
+            let matches = pattern.exec(message);
 
             if (matches) {
                 let skipped = false;
