@@ -16,7 +16,7 @@ class BotHandler {
 
         this.telegraf.start(BotHandler.start);
 
-        const handlers = {
+        this.handlers = {
             add: {
                 pattern: /^add (.*)$/i,
                 handler: this.addMovie,
@@ -31,7 +31,7 @@ class BotHandler {
             },
         };
 
-        for (let endpoint of Object.values(handlers)) {
+        for (let endpoint of Object.values(this.handlers)) {
             this.telegraf.hears(
                 endpoint.pattern,
                 endpoint.handler.bind(this)
@@ -202,7 +202,7 @@ class BotHandler {
 
         console.log(`Rand command`);
 
-        const movie; // TODO: Get random movie.
+        const movie = null; // TODO: Get random movie.
 
         await ctx.reply(movie.title);
 
