@@ -29,7 +29,6 @@ class Movie {
                 this.year = existing_movie.year
                 this.poster_url = existing_movie.poster_url
                 this.genreList = existing_movie.genreList
-                console.log(existing_movie)
             }
         } catch (err) {
             console.log(err)

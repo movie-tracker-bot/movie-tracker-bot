@@ -58,6 +58,7 @@ class MovieGenreList {
 }
 
 class MovieGenreRelation {
+    
     constructor(movie_id, genre_id) {
         this.movie_id = movie_id
         this.genre_id = genre_id
