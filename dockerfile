@@ -1,4 +1,6 @@
-FROM node:alpine
+FROM node:15.7.0-alpine
+	# 15.6-alpine
+	# lts-alpine
 
 RUN mkdir -p /usr/src/movie-tracker-bot
 
