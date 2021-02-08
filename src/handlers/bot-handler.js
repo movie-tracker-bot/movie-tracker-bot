@@ -1,6 +1,8 @@
 const ImdbService = require('../services/imdb-service');
 const Movie = require('../models/movie');
 const User = require('../models/user');
+const UserMovie = require('../models/user-movie');
+
 
 class BotHandler {
     /**
@@ -107,7 +109,8 @@ class BotHandler {
                 const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image?.url);
                 movieDAO.createIfDoesntExist();
 
-                // TODO: associate movie to user.
+                const userMovieDAO = new UserMovie(null, ctx.from.id, movie.id);
+                userMovieDAO.createIfDoesntExist();
 
                 await ctx.reply('Got it!');
 
