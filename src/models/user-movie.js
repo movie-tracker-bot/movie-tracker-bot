@@ -12,8 +12,8 @@ class UserMovie {
      */
     constructor (id = null, user = null, movie = null, watched = false, score = null) {
         this.id = id
-        this.user = user
-        this.movie = movie
+        this.user_id = user
+        this.movie_id = movie
         this.watched = watched
         this.score = score
     }
@@ -42,9 +42,9 @@ class UserMovie {
         try {
             const db = await Database.getDatabase()
             await db.run(`INSERT INTO user_movie(user_id, movie_id, watched, score)
-                    VALUES (?, ?, ?, ?)`, [this.user.telegram_id, this.movie.id, this.watched, this.score])
+                    VALUES (?, ?, ?, ?)`, [this.user_id, this.movie_id, this.watched, this.score])
             db.close()
-            let userMovie = await UserMovie.findByUserTelegramIdAndMovieId(this.user.telegram_id,this.movie.id)
+            let userMovie = await UserMovie.findByUserTelegramIdAndMovieId(this.user_id,this.movie_id)
             this.id = userMovie.id
         } catch (err) {
             console.log(err)
