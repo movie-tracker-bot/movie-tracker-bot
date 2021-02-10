@@ -61,7 +61,7 @@ class BotHandler {
 
         let user = new User(ctx.from.id, ctx.from.username);
 
-        user.save();
+        user.createIfDoesntExist();
     }
 
 
