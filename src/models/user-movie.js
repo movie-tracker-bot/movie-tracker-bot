@@ -69,6 +69,25 @@ class UserMovie {
             console.log("An error occurred while consulting movie in user list")
         }
     }
+
+    static async findRandomByUserTelegramId(user_telegram_id) {
+        try {
+            const db = await Database.getDatabase();
+            let result = await db.get('SELECT * FROM user_movie WHERE user_id = ? ORDER BY RANDOM() LIMIT 1', [user_telegram_id])
+            var userMovie = null
+            if(result){
+                var user = await User.findByTelegramId(user_telegram_id)
+                var movie = await Movie.findByImdbId(result.movie_id)
+                userMovie = new UserMovie(result.id, user, movie, result.watched, result.score)
+            }
+            db.close()
+            return userMovie
+        } catch(err){
+            console.log(err)
+            console.log("An error occurred while consulting movie in user list")
+        }
+    }
+    /**
     /**
      * 
      * @param {Number} user_telegram_id 

@@ -201,15 +201,23 @@ class BotHandler {
 
         console.log(`Rand command`);
 
-        const movie = null; // TODO: Get random movie.
+        const userMovie = await UserMovie.findRandomByUserTelegramId(user);
 
-        await ctx.reply(movie.title);
+        const movie = userMovie.movie_id;
 
-        if (movie.poster_url) {
-            await ctx.replyWithPhoto(movie.poster_url);
+        if (movie) {
+            await ctx.reply(movie.title);
+
+            if (movie.poster_url) {
+                await ctx.replyWithPhoto(movie.poster_url);
+            }
+
+            await ctx.reply('Have a nice movie :)');
         }
-
-        await ctx.reply('Have a nice movie :)');
+        else {
+            await ctx.reply("You don't have any movies in you list :(");
+            await ctx.reply("Try adding some with the 'add' command.");
+        }
     }
 
 
