@@ -7,23 +7,23 @@ class Movie {
      * @param {string} poster_url
      */
     constructor(id = null, imdb_id, title, year = null, poster_url = null) {
-        this.id = id;
-        this.imdb_id = imdb_id;
-        this.title = title;
-        this.year = year;
-        this.poster_url = poster_url;
-        this.genreList = null;
+        this.id = id
+        this.imdb_id = imdb_id
+        this.title = title
+        this.year = year
+        this.poster_url = poster_url
+        this.genreList = null
 
-        this.saved = false;
+        this.saved = false
     }
 
 
     async createIfDoesntExist() {
-        await this.save();
+        await this.save()
     }
 
     async save() {
-        this.saved = true;
+        this.saved = true
     }
 
     /**
@@ -31,7 +31,7 @@ class Movie {
      */
     static async findByImdbId(imdb_id) {
         // TODO
-        return null;
+        return null
     }
 
     /**
@@ -39,13 +39,13 @@ class Movie {
      */
     static async findById(id) {
         // TODO
-        return null;
+        return null
     }
 
     async fillGenreList() {
         // TODO
-        return null;
+        return null
     }
 }
 
-module.exports = Movie;
+module.exports = Movie

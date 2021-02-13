@@ -3,14 +3,14 @@ class User {
      * @param {number} telegram_id
      * @param {string} first_name
      */
-    constructor (telegram_id,first_name) {
-        this.telegram_id = telegram_id;
-        this.first_name = first_name;
-        this.saved = false;
+    constructor(telegram_id, first_name) {
+        this.telegram_id = telegram_id
+        this.first_name = first_name
+        this.saved = false
     }
 
     async save() {
-        this.saved = true;
+        this.saved = true
     }
 
     /**
@@ -18,9 +18,9 @@ class User {
      */
     static async findByTelegramId(telegram_id) {
         // TODO.
-        return null;
+        return null
     }
 }
 
 
-module.exports = User;
+module.exports = User

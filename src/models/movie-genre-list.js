@@ -36,7 +36,7 @@ class MovieGenreList {
                     return
                 }
             }
-            let idx = -1;
+            let idx = -1
             for (let i = 0; i < this.genres.length; i++) {
                 if (this.genres[i].id === genre.id) {
                     idx = i
@@ -58,7 +58,7 @@ class MovieGenreList {
 }
 
 class MovieGenreRelation {
-    
+
     constructor(movie_id, genre_id) {
         this.movie_id = movie_id
         this.genre_id = genre_id

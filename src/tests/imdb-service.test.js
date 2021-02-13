@@ -1,4 +1,4 @@
-const ImdbService = require("../../src/services/imdb-service")
+const ImdbService = require('../../src/services/imdb-service')
 
 describe('Search movie in IMDB API', function () {
     it('movie exits', async function () {

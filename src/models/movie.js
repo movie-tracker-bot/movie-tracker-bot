@@ -46,7 +46,7 @@ class Movie {
             this.genreList = new MovieGenreList(this.id)
         } catch (err) {
             if (err.code === 'SQLITE_CONSTRAINT') {
-                console.log('Movie already exists.');
+                console.log('Movie already exists.')
             }
             else {
                 console.log(err)
