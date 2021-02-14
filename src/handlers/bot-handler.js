@@ -49,11 +49,11 @@ class BotHandler {
     }
 
 
-    async start(ctx) {
-        const welcomeMessage = Menssages.welcomeMessage
-        await ctx.replyWithMarkdown(welcomeMessage);
-        let user = new User(ctx.from.id, ctx.from.username);
-        user.createIfDoesntExist();
+    static async start(ctx) {
+        const welcomeMessage = Menssages.welcomeMessage()
+        await ctx.replyWithMarkdown(welcomeMessage)
+        let user = new User(ctx.from.id, ctx.from.username)
+        user.createIfDoesntExist()
     }
 
 
