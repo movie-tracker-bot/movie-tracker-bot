@@ -221,11 +221,15 @@ class BotHandler {
             return;
         }
 
-        console.log(ctx.match[1])
-
-        console.log(ctx.match[2])
         const movieName = Formatter.removeAccentsAndLowerCase(ctx.match[1])
-        const score = Number(ctx.match[2])
+        const score = Formatter.getNumberOfString(ctx.match[1])
+        if (!movieName || !score) {
+            await ctx.reply("To add score please send movie name + score")
+            return
+        } else if (score < 0 || score > 10) {
+            await ctx.reply("The score need to be between 0 and 10")
+            return
+        }
 
         const state = this.state[id] = {
             movie_ix: 0,
