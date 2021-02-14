@@ -1,24 +1,23 @@
-const fs = require('fs');
-const sqlite3 = require('sqlite3').verbose();
-const sqlite = require('sqlite');
-
+const fs = require('fs')
+const sqlite3 = require('sqlite3').verbose()
+const sqlite = require('sqlite')
+const filename = './database/movie_tracker_bot.db'
+//const filename = '.\database\movie_tracker_bot.db'
 
 class Database {
-    static filename = './database/movie_tracker_bot.db';
-
     /**
      * Retorna um objeto Database para fazer operações no banco de dados
      */
     static async getDatabase() {
-        return await sqlite.open({ filename: Database.filename, driver: sqlite3.Database })
+        return await sqlite.open({ filename: filename, driver: sqlite3.Database })
     }
 
     /**
      * Inicializa o banco, criando-o caso necessário.
      */
     static init() {
-        if (!fs.existsSync(Database.filename)) {
-            Database.createTables();
+        if (!fs.existsSync(filename)) {
+            Database.createTables()
         }
     }
 
@@ -26,56 +25,52 @@ class Database {
     Cria as tabelas e configura o banco de dados, se ele ainda não foi configurado
      */
     static createTables() {
-        const db = new sqlite3.Database(Database.filename)
+        const db = new sqlite3.Database(filename)
         db.serialize(() => {
-            db.run("PRAGMA foreign_keys = ON;", (err) => {
+            db.run('PRAGMA foreign_keys = ON;', (err) => {
                 if (err) {
                     console.log(err)
-                    throw Error("An error occurred while activating foreign keys")
+                    throw Error('An error occurred while activating foreign keys')
                 }
             })
                 .run(`CREATE TABLE IF NOT EXISTS user(
                     telegram_id INTEGER PRIMARY KEY,
-                    first_name TEXT NOT NULL);`,
-                    (err) => {
-                        if (err) {
-                            console.log(err)
-                            throw Error("An error occurred while creating the 'user' table")
-                        }
-                    })
+                    first_name TEXT NOT NULL);`, (err) => {
+                    if (err) {
+                        console.log(err)
+                        throw Error('An error occurred while creating the \'user\' table')
+                    }
+                })
                 .run(`CREATE TABLE IF NOT EXISTS genre(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL);`,
-                    (err) => {
-                        if (err) {
-                            console.log(err)
-                            throw Error("An error occurred while creating the 'genre' table")
-                        }
-                    })
+                    name TEXT NOT NULL);`, (err) => {
+                    if (err) {
+                        console.log(err)
+                        throw Error('An error occurred while creating the \'genre\' table')
+                    }
+                })
                 .run(`CREATE TABLE IF NOT EXISTS movie(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 imdb_id TEXT UNIQUE,
                 title TEXT NOT NULL,
                 year INTEGER,
-                poster_url TEXT);`,
-                    (err) => {
-                        if (err) {
-                            console.log(err)
-                            throw Error("An error occurred while creating the 'movie' table")
-                        }
-                    })
+                poster_url TEXT);`, (err) => {
+                    if (err) {
+                        console.log(err)
+                        throw Error('An error occurred while creating the \'movie\' table')
+                    }
+                })
                 .run(`CREATE TABLE IF NOT EXISTS movie_genre(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 movie_id INTEGER REFERENCES movie(id) ON DELETE RESTRICT ON UPDATE CASCADE,
                 genre_id INTEGER REFERENCES genre(id) ON DELETE RESTRICT ON UPDATE CASCADE);
                 CREATE INDEX IF NOT EXISTS movie_genre_movie_id_fidx ON movie_genre(movie_id);
-                CREATE INDEX IF NOT EXISTS movie_genre_genre_id_fidx ON movie_genre(genre_id);`,
-                    (err) => {
-                        if (err) {
-                            console.log(err)
-                            throw Error("An error occurred while creating the 'movie_genre' table")
-                        }
-                    })
+                CREATE INDEX IF NOT EXISTS movie_genre_genre_id_fidx ON movie_genre(genre_id);`, (err) => {
+                    if (err) {
+                        console.log(err)
+                        throw Error('An error occurred while creating the \'movie_genre\' table')
+                    }
+                })
                 .run(`CREATE TABLE IF NOT EXISTS user_movie(
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER REFERENCES user(telegram_id) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -83,13 +78,12 @@ class Database {
                 watched INTEGER DEFAULT 0 NOT NULL,
                 score INTEGER);
                 CREATE INDEX IF NOT EXISTS user_movie_user_id_fidx ON user_movie(user_id);
-                CREATE INDEX IF NOT EXISTS user_movie_movie_id_fidx ON user_movie(movie_id);`,
-                    (err) => {
-                        if (err) {
-                            console.log(err)
-                            throw Error("An error occurred while creating the 'user_movie' table")
-                        }
-                    })
+                CREATE INDEX IF NOT EXISTS user_movie_movie_id_fidx ON user_movie(movie_id);`, (err) => {
+                    if (err) {
+                        console.log(err)
+                        throw Error('An error occurred while creating the \'user_movie\' table')
+                    }
+                })
         })
     }
 }

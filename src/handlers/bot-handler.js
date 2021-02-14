@@ -96,7 +96,7 @@ class BotHandler {
         state.next = this.confirm.bind(
             this,
 
-            async (ctx, state) => {
+            async () => {
                 const movie = state.movie_list[state.movie_ix];
 
                 const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image?.url);
@@ -110,7 +110,7 @@ class BotHandler {
                 return true;
             },
 
-            async (ctx, state) => {
+            async () => {
                 state.movie_ix++;
 
                 if (state.movie_list.length == state.movie_ix) {
@@ -123,7 +123,7 @@ class BotHandler {
                 }
             },
 
-            async (ctx, state) => {
+            async () => {
                 await ctx.reply('Cancelling...');
                 return true;
             }
@@ -174,7 +174,6 @@ class BotHandler {
 
             default:
                 await ctx.reply("Come again?");
-                done = false;
                 break;
         }
 
