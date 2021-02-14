@@ -103,18 +103,19 @@ test(
 test(
     'test add endpoint pattern',
     () => {
-        const { pattern, handler } = bot.handlers.add
+        const { pattern } = bot.handlers.add
 
         const shouldMatch = [
             'add movie',
             'Add movie',
             'AdD very long movie name with too many words',
+            ' Add with leading space',
         ]
 
         const shouldNotMatch = [
             'addmovie',
             'Addmovie',
-            ' Add with leading space',
+
             'ad movie',
             'addd movie',
         ]

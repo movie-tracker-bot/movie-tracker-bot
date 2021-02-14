@@ -23,7 +23,7 @@ class BotHandler {
 
         this.handlers = {
             add: {
-                pattern: / *?\add (.*)$/i,
+                pattern: / *?add (.*)$/i,
                 handler: this.addMovie,
             },
             rand: {
@@ -349,11 +349,7 @@ class BotHandler {
             return
         }
 
-        let response = ''
-        for (const movie of movies) {
-            response += `${movie.title} - ${movie.score}\n`
-        }
-        await ctx.reply(response)
+        await ctx.reply(Menssages.rankMovieMessage(movies))
         return
     }
 

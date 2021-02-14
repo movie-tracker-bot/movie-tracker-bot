@@ -24,5 +24,15 @@ class Formatter {
         return Number(str)
     }
 
+    static getMedals(number) {
+        switch (number) {
+            case 1:
+                return '🥇'
+            case 2:
+                return '🥈'
+            case 3:
+                return '🥉'
+        }
+    }
 }
 module.exports = Formatter
