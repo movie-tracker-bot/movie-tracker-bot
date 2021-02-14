@@ -93,6 +93,26 @@ class Movie {
             return null
         }
     }
+
+
+    static async findByTitle(title) {
+        try {
+            const db = await Database.getDatabase()
+            let result = await db.get('SELECT * FROM movie WHERE title = ?', [title])
+            var movie = null
+            if (result) {
+                movie = new Movie(result.id, result.imdb_id, result.title, result.year, result.poster_url)
+                await movie.fillGenreList()
+            }
+            db.close()
+            return movie
+        } catch (err) {
+            console.log('Error on retrieving movie')
+            return null
+        }
+    }
+
+
     async fillGenreList() {
         this.genreList = new MovieGenreList(this.id)
         await this.genreList.getGenres()

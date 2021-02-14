@@ -32,6 +32,10 @@ class BotHandler {
             score: {
                 pattern: / *?score (.*)$/i,
                 handler: this.setScore,
+            },
+            remove: {
+                pattern: / *?remove (.*)$/i,
+                handler: this.removeMovie,
             }
         }
 
@@ -272,6 +276,31 @@ class BotHandler {
         )
     }
 
+    async removeMovie(ctx, next) {
+        const user = ctx.from.id
+
+        if (this.state[user]) { // Previous action is still ongoing.
+            await next()
+            return
+        }
+
+        const movieName = ctx.match[1]
+        if (!movieName || movieName.length <= 0) {
+            await ctx.reply('To remove a movie, you must inform the name')
+            return
+        }
+
+        const movie = await Movie.findByTitle(movieName)
+        if (!movie) {
+            await ctx.reply(`Thie movie ${movieName} isn't in your list`)
+            return
+        }
+
+        //TODO: Delete movie 
+        await ctx.reply(`Thie movie ${movieName} was deleted!`)
+        return
+
+    }
 
     async launch() {
         await this.telegraf.launch()
