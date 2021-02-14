@@ -3,6 +3,7 @@ const Movie = require('../models/movie');
 const User = require('../models/user');
 const UserMovie = require('../models/user-movie');
 const Menssages = require('../helpers/messages');
+const Formatter = require('../helpers/formatter');
 
 
 class BotHandler {
@@ -21,15 +22,15 @@ class BotHandler {
 
         this.handlers = {
             add: {
-                pattern: /^add (.*)$/i,
+                pattern: / *?\add (.*)$/i,
                 handler: this.addMovie,
             },
             rand: {
-                pattern: /^rand$/i,
+                pattern: / *?rand$/i,
                 handler: this.randMovie,
             },
             score: {
-                pattern: /^score$/i,
+                pattern: / *?score (.*)$/i,
                 handler: this.setScore,
             }
         };
@@ -215,15 +216,18 @@ class BotHandler {
     async setScore(ctx, next) {
         const id = ctx.from.id;
 
-        if (this.state[user]) { // Previous action is still ongoing.
+        if (this.state[id]) { // Previous action is still ongoing.
             await next();
             return;
         }
 
+        console.log(ctx.match[1])
+
+        console.log(ctx.match[2])
         const movieName = Formatter.removeAccentsAndLowerCase(ctx.match[1])
         const score = Number(ctx.match[2])
 
-        const state = this.state[user] = {
+        const state = this.state[id] = {
             movie_ix: 0,
             movie_list: await ImdbService.getMovieByTitle(movieName),
         };
