@@ -29,7 +29,7 @@ class BotHandler {
                 handler: this.randMovie,
             },
             score: {
-                pattern: /^rand$/i,
+                pattern: /^score$/i,
                 handler: this.setScore,
             }
         };
