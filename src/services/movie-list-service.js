@@ -49,8 +49,15 @@ class MovieListService {
     async getListByScore(maxLength = 10) {
 
     }
-    async sortByScore() {
 
+    static sortByScore(movies) {
+        let ranks = []
+        for (const movie of movies) {
+            if (movie.score && !Number.isNaN(movie.score)) {
+                ranks.push(movie)
+            }
+        }
+        return ranks.sort((a, b) => Number(a.score) > Number(b.score))
     }
 }
 

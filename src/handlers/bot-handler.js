@@ -4,6 +4,7 @@ const User = require('../models/user')
 const UserMovie = require('../models/user-movie')
 const Menssages = require('../helpers/messages')
 const Formatter = require('../helpers/formatter')
+const MovieListService = require('../services/movie-list-service')
 
 
 class BotHandler {
@@ -40,6 +41,10 @@ class BotHandler {
             list: {
                 pattern: / *?list$/i,
                 handler: this.getMovies,
+            },
+            myRank: {
+                pattern: / *?myRank$/i,
+                handler: this.getRank,
             }
         }
 
@@ -326,6 +331,30 @@ class BotHandler {
         await ctx.reply(response)
         return
 
+    }
+
+    async getRank(ctx, next) {
+        const id = ctx.from.id
+
+        if (this.state[id]) { // Previous action is still ongoing.
+            await next()
+            return
+        }
+
+        let movies = await UserMovie.findMovieListByUserTelegramId(id)
+        movies = MovieListService.sortByScore(movies)
+
+        if (!movies || movies.length <= 0) {
+            await ctx.reply('Your list is empty, you can add new movies using /add comand')
+            return
+        }
+
+        let response = ''
+        for (const movie of movies) {
+            response += `${movie.title} - ${movie.score}\n`
+        }
+        await ctx.reply(response)
+        return
     }
 
     async launch() {

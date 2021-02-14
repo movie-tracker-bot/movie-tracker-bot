@@ -100,6 +100,7 @@ class UserMovie {
             if (Array.isArray(results)) {
                 for (let i = 0; i < results.length; i++) {
                     let movie = await Movie.findById(results[i].id)
+                    movie.score = results[i].score
                     if (movie) {
                         movieList.push(movie)
                     }
