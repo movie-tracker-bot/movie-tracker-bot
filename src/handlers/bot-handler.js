@@ -36,6 +36,10 @@ class BotHandler {
             remove: {
                 pattern: / *?remove (.*)$/i,
                 handler: this.removeMovie,
+            },
+            list: {
+                pattern: / *?list$/i,
+                handler: this.getMovies,
             }
         }
 
@@ -298,6 +302,28 @@ class BotHandler {
 
         //TODO: Delete movie 
         await ctx.reply(`Thie movie ${movieName} was deleted!`)
+        return
+
+    }
+
+    async getMovies(ctx, next) {
+        const id = ctx.from.id
+
+        if (this.state[id]) { // Previous action is still ongoing.
+            await next()
+            return
+        }
+
+        const movies = await UserMovie.findMovieListByUserTelegramId(id)
+        let response = ''
+        for (const movie of movies) {
+            response += `${movie.id} - ${movie.title}\n`
+        }
+        if (!response || response.length <= 0) {
+            await ctx.reply('Your list is empty, you can add new movies using /add comand')
+            return
+        }
+        await ctx.reply(response)
         return
 
     }

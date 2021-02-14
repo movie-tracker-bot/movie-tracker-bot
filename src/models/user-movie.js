@@ -99,8 +99,10 @@ class UserMovie {
             var movieList = []
             if (Array.isArray(results)) {
                 for (let i = 0; i < results.length; i++) {
-                    let movie = await Movie.findById(results[i].movie_id)
-                    movieList.push(movie)
+                    let movie = await Movie.findById(results[i].id)
+                    if (movie) {
+                        movieList.push(movie)
+                    }
                 }
             }
             return movieList
@@ -109,6 +111,7 @@ class UserMovie {
             console.log('An error occurred while getting user_movie list')
         }
     }
+
     /**
      * 
      * @param {Number} user_telegram_id 
@@ -131,6 +134,7 @@ class UserMovie {
             console.log('An error occurred while getting user_movie list')
         }
     }
+
 }
 
 module.exports = UserMovie
