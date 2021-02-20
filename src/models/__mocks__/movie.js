@@ -1,4 +1,6 @@
 class Movie {
+    static saved = [];
+
     /**
      * @param {number} id - assingned by database
      * @param {string} imdb_id
@@ -13,8 +15,11 @@ class Movie {
         this.year = year
         this.poster_url = poster_url
         this.genreList = null
+    }
 
-        this.saved = false
+
+    static reset() {
+        Movie.saved.length = 0
     }
 
 
@@ -23,7 +28,7 @@ class Movie {
     }
 
     async save() {
-        this.saved = true
+        Movie.saved.push(this)
     }
 
     /**

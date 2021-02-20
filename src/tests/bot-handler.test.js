@@ -1,7 +1,9 @@
 const { Telegraf } = require('telegraf')
 const BotHandler = require('../handlers/bot-handler')
+const Movie = require('../models/movie')
 jest.mock('../models/movie')
 jest.mock('../models/user')
+jest.mock('../models/user-movie')
 jest.mock('../services/imdb-service')
 
 
@@ -17,6 +19,10 @@ afterAll(() => {
     bot.stop()
 })
 
+beforeEach(() => {
+    Movie.reset()
+})
+
 
 test(
     'test start message',
@@ -26,6 +32,8 @@ test(
         expect(replies.markdown.length).not.toEqual(0)
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual([])
+
+        expect(Movie.saved.length).toEqual(0)
     }
 )
 
@@ -95,6 +103,8 @@ test(
         expect(replies.markdown).toEqual([])
         expect(replies.photos).toEqual([])
         expect(replies.text.length).toEqual(1)
+
+        expect(Movie.saved.length).toEqual(0)
     }
 )
 

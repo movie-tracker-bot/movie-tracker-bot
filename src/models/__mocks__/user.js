@@ -1,4 +1,6 @@
 class User {
+    static saved = [];
+
     /**
      * @param {number} telegram_id
      * @param {string} first_name
@@ -6,11 +8,18 @@ class User {
     constructor(telegram_id, first_name) {
         this.telegram_id = telegram_id
         this.first_name = first_name
-        this.saved = false
+    }
+
+    static reset() {
+        User.saved.length = 0
     }
 
     async save() {
-        this.saved = true
+        User.saved.push(this)
+    }
+
+    async createIfDoesntExist() {
+        this.save()
     }
 
     /**
