@@ -62,6 +62,38 @@ test(
         expect(replies.markdown).toEqual([])
         expect(replies.photos).toEqual([])
         expect(replies.text.length).toEqual(1)
+
+        expect(Movie.saved.length).toEqual(1)
+    }
+)
+
+
+test(
+    'test cancel add movie',
+    async () => {
+        let replies = await telegraf.sendMessage('add interstellar')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(1)
+        expect(replies.text).toEqual(
+            expect.arrayContaining(['Interstellar'])
+        )
+
+        replies = await telegraf.sendMessage('nope')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(1)
+        expect(replies.text).toEqual(
+            expect.arrayContaining(['Interstelar'])
+        )
+
+        replies = await telegraf.sendMessage('cancel')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos).toEqual([])
+        expect(replies.text.length).toEqual(1)
+
+        expect(Movie.saved.length).toEqual(0)
     }
 )
 
