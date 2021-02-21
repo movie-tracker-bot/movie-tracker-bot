@@ -1,6 +1,8 @@
 const { Telegraf } = require('telegraf')
 const BotHandler = require('../handlers/bot-handler')
 const Movie = require('../models/movie')
+const User = require('../models/user')
+const UserMovie = require('../models/user-movie')
 jest.mock('../models/movie')
 jest.mock('../models/user')
 jest.mock('../models/user-movie')
@@ -20,7 +22,9 @@ afterAll(() => {
 })
 
 beforeEach(() => {
+    User.reset()
     Movie.reset()
+    UserMovie.reset()
 })
 
 
@@ -34,6 +38,36 @@ test(
         expect(replies.text).toEqual([])
 
         expect(Movie.saved.length).toEqual(0)
+    }
+)
+
+
+test(
+    'test add endpoint pattern',
+    () => {
+        const { pattern } = bot.handlers.add
+
+        const shouldMatch = [
+            'add movie',
+            'Add movie',
+            'AdD very long movie name with too many words',
+            ' Add with leading space',
+        ]
+
+        const shouldNotMatch = [
+            'addmovie',
+            'Addmovie',
+            'ad movie',
+            'addd movie',
+        ]
+
+        for (let input of shouldMatch) {
+            expect(pattern.test(input)).toBeTruthy()
+        }
+
+        for (let input of shouldNotMatch) {
+            expect(pattern.test(input)).toBeFalsy()
+        }
     }
 )
 
@@ -141,25 +175,24 @@ test(
 )
 
 
-
 test(
-    'test add endpoint pattern',
+    'test rand endpoint pattern',
     () => {
-        const { pattern } = bot.handlers.add
+        const { pattern } = bot.handlers.rand
 
         const shouldMatch = [
-            'add movie',
-            'Add movie',
-            'AdD very long movie name with too many words',
-            ' Add with leading space',
+            'rand',
+            '   rand',
+            '/rand',
+            ' /rand',
         ]
 
         const shouldNotMatch = [
-            'addmovie',
-            'Addmovie',
-
-            'ad movie',
-            'addd movie',
+            'rand movie',
+            'randmovie',
+            'rad',
+            'raand',
+            'r and',
         ]
 
         for (let input of shouldMatch) {
@@ -169,5 +202,30 @@ test(
         for (let input of shouldNotMatch) {
             expect(pattern.test(input)).toBeFalsy()
         }
+    }
+)
+
+
+test(
+    'test rand movie',
+    async () => {
+        let replies = await telegraf.sendMessage('rand')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text.length).toBeGreaterThan(0)
+
+        let user = new User(1, 'random user')
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        let userMovie = new UserMovie(1, user, movie, false, 5)
+        await userMovie.save()
+
+        replies = await telegraf.sendMessage('rand')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(1)
+        expect(replies.text).toEqual(
+            expect.arrayContaining(['random movie'])
+        )
     }
 )
