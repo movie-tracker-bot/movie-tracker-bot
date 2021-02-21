@@ -167,6 +167,13 @@ class BotHandler {
         await ctx.reply('Is this the correct movie?')
     }
 
+    static async askMovieFromDatabaseConfirmation(ctx, movie){
+        await ctx.reply(movie.title)
+        if (movie.poster_url){
+            await ctx.replyWithPhoto(movie.poster_url)
+        }
+        await ctx.reply('Is this the correct movie?')
+    }
 
     async confirm(positive, negative, cancel, ctx) {
         const user = ctx.from.id
@@ -319,10 +326,25 @@ class BotHandler {
             await ctx.reply(`The movie ${movieName} isn't in your list`)
             return
         }
-        await user_movie.delete()
-        await ctx.reply(`Thie movie ${movieName} was deleted!`)
-        return
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie)
 
+        this.state[user] = {}
+        this.state[user].next = this.confirm.bind(
+            this,
+            async (ctx) => {
+                await user_movie.delete()
+                await ctx.reply(`The movie ${movieName} was deleted!`)
+                return true
+            },
+            async (ctx) =>{
+                await ctx.reply('Well, I ain\'t got any other suggestions...')
+                return true
+            },
+            async (ctx) =>{
+                await ctx.reply('Cancelling...')
+                return true
+            }  
+        )
     }
 
     async getMovies(ctx, next) {
