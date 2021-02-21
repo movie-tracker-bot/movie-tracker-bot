@@ -1,5 +1,6 @@
 const Database = require('./database')
 const Genre = require('./genre')
+
 class MovieGenreList {
     constructor(movie_id) {
         this.movie_id = movie_id
@@ -10,7 +11,7 @@ class MovieGenreList {
     }
     async add(genre) {
         try {
-            let idx = this.genres.indexOf()
+            let idx = this.genres.indexOf(genre)
             if (idx !== -1) {
                 return
             }
