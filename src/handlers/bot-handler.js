@@ -1,9 +1,13 @@
-const ImdbService = require('../services/imdb-service')
 const Movie = require('../models/movie')
 const User = require('../models/user')
 const UserMovie = require('../models/user-movie')
+const Genre = require('../models/genre')
+const MovieGenreList = require('../models/movie-genre-list')
+
 const Menssages = require('../helpers/messages')
 const Formatter = require('../helpers/formatter')
+
+const ImdbService = require('../services/imdb-service')
 const MovieListService = require('../services/movie-list-service')
 
 
@@ -118,6 +122,13 @@ class BotHandler {
                 const userMovieDAO = new UserMovie(null, ctx.from.id, movie.id)
                 userMovieDAO.createIfDoesntExist()
 
+                const movieGenreList = new MovieGenreList(movie.id)
+                const genres = await ImdbService.getMovieGenres(Formatter.getMovieId(movie.id))
+
+                for (const genre of genres) {
+                    await movieGenreList.add(new Genre(null, genre))
+                }
+
                 await ctx.reply('Got it!')
 
                 return true
@@ -208,9 +219,9 @@ class BotHandler {
 
         const userMovie = await UserMovie.findRandomByUserTelegramId(user)
 
-        const movie = userMovie.movie_id
+        if (userMovie) {
+            const movie = userMovie.movie_id
 
-        if (movie) {
             await ctx.reply(movie.title)
 
             if (movie.poster_url) {

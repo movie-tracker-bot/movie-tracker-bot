@@ -10,6 +10,10 @@ class ImdbService {
         // TODO.
         return null;
     }
+
+    static async getMovieGenres(id) {
+        return [ "Adventure", "Drama", "Sci-Fi" ]
+    }
 }
 
 

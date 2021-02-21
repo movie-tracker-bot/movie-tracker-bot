@@ -3,9 +3,11 @@ const BotHandler = require('../handlers/bot-handler')
 const Movie = require('../models/movie')
 const User = require('../models/user')
 const UserMovie = require('../models/user-movie')
-jest.mock('../models/movie')
 jest.mock('../models/user')
+jest.mock('../models/movie')
 jest.mock('../models/user-movie')
+jest.mock('../models/genre')
+jest.mock('../models/movie-genre-list')
 jest.mock('../services/imdb-service')
 
 

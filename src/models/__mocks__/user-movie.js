@@ -1,3 +1,6 @@
+const User = require('./user')
+const Movie = require('./movie')
+
 class UserMovie {
     static saved = [];
 
@@ -33,7 +36,7 @@ class UserMovie {
     }
 
     static async findRandomByUserTelegramId(user_telegram_id) {
-        // TODO.
+        return UserMovie.saved[0]
     }
     /**
     /**

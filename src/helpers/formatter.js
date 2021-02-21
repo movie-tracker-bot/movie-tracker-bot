@@ -34,5 +34,10 @@ class Formatter {
                 return '🥉'
         }
     }
+
+    static getMovieId(idString) {
+        let regex = new RegExp('/title/(tt[0-9]+)/')
+        return regex.exec(idString)[1]
+    }
 }
 module.exports = Formatter
