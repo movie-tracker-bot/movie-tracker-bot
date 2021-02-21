@@ -52,6 +52,18 @@ class UserMovie {
         }
     }
 
+    async delete(){
+        try {
+            const db = await Database.getDatabase()
+            await db.run(`DELETE FROM user_movie WHERE id = ?`, 
+                        [this.id])
+            db.close()
+        } catch (err) {
+            console.log(err)
+            console.log('Error while deleting movie of user list')
+        }
+    }
+
     static async findByUserTelegramIdAndMovieId(user_telegram_id, movie_id) {
         try {
             const db = await Database.getDatabase()

@@ -107,6 +107,7 @@ class Movie {
             db.close()
             return movie
         } catch (err) {
+            console.log(err)
             console.log('Error on retrieving movie')
             return null
         }

@@ -309,14 +309,17 @@ class BotHandler {
             await ctx.reply('To remove a movie, you must inform the name')
             return
         }
-
         const movie = await Movie.findByTitle(movieName)
         if (!movie) {
-            await ctx.reply(`Thie movie ${movieName} isn't in your list`)
+            await ctx.reply(`The movie ${movieName} isn't in your list`)
             return
         }
-
-        //TODO: Delete movie 
+        const user_movie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.imdb_id)
+        if (!user_movie){
+            await ctx.reply(`The movie ${movieName} isn't in your list`)
+            return
+        }
+        await user_movie.delete()
         await ctx.reply(`Thie movie ${movieName} was deleted!`)
         return
 
