@@ -29,7 +29,12 @@ class UserMovie {
                 this.user_id = existingUserMovie.user_id
                 this.movie_id = existingUserMovie.movie_id
                 this.watched = existingUserMovie.watched
-                this.score = existingUserMovie.score
+                if (this.score && this.score != existingUserMovie.score){
+                    this.updateScore()
+                }
+                else{
+                    this.score = existingUserMovie.score
+                }
             }
 
         } catch (err) {
@@ -111,7 +116,7 @@ class UserMovie {
             var movieList = []
             if (Array.isArray(results)) {
                 for (let i = 0; i < results.length; i++) {
-                    let movie = await Movie.findById(results[i].id)
+                    let movie = await Movie.findById(results[i].movie_id)
                     movie.score = results[i].score
                     if (movie) {
                         movieList.push(movie)
@@ -147,7 +152,17 @@ class UserMovie {
             console.log('An error occurred while getting user_movie list')
         }
     }
-
+    async updateScore(){
+        try {
+            const db = await Database.getDatabase()
+            await db.run(`UPDATE user_movie SET score = ? WHERE id = ?;`, [this.score, this.id]) 
+            db.close()
+        } catch (err) {
+            console.log(err)
+            console.log("An error occurred while trying to update movie score")
+        }
+        
+    }
 }
 
 module.exports = UserMovie

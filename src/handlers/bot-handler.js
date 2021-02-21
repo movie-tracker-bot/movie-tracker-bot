@@ -304,7 +304,7 @@ class BotHandler {
             return
         }
 
-        const movieName = ctx.match[1]
+        const movieName = Formatter.toTitleCase(ctx.match[1]) 
         if (!movieName || movieName.length <= 0) {
             await ctx.reply('To remove a movie, you must inform the name')
             return

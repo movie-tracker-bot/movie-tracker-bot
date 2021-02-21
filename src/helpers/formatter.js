@@ -39,5 +39,9 @@ class Formatter {
         let regex = new RegExp('/title/(tt[0-9]+)/')
         return regex.exec(idString)[1]
     }
+
+    static toTitleCase(string){
+        return _.startCase(_.camelCase(string))
+    }
 }
 module.exports = Formatter
