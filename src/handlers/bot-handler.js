@@ -277,7 +277,7 @@ class BotHandler {
             }
             const movie = new Movie(null,movie_list[0].id,movie_list[0].title,movie_list[0].year,poster_url)
             await movie.createIfDoesntExist()
-            await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie,`The movie isn't in your list\nDo you want to add it and set it's score to ${score}?`)
+            await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie,`The movie isn't on your list\nDo you want to add it and set it's score to ${score}?`)
             var state = this.state[id] = {userId: id,
                              movieName: movieName,
                              score: score}
@@ -303,7 +303,7 @@ class BotHandler {
 
         const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(id,movie.id)
         if (!userMovie){
-            await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `This movie isn\'t in your list\nDo you want to add it and set it\'s score to ${score}?`)
+            await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `This movie isn\'t on your list\nDo you want to add it and set it\'s score to ${score}?`)
             this.state[id] = {}
             this.state[id].next = this.confirm.bind(
                 this,
@@ -383,12 +383,12 @@ class BotHandler {
         }
         const movie = await Movie.findByTitle(movieName)
         if (!movie) {
-            await ctx.reply(`The movie ${movieName} isn't in your list`)
+            await ctx.reply(`The movie ${movieName} isn't on your list`)
             return
         }
         const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.id)
         if (!userMovie){
-            await ctx.reply(`The movie ${movieName} isn't in your list`)
+            await ctx.reply(`The movie ${movieName} isn't on your list`)
             return
         }
         await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie, "Are you sure you want to remove this movie from your list? This action can't be undone")
