@@ -27,3 +27,5 @@ Technologies:
 - Gabriel Bastos
 
 Three development sprints.
+
+[Project board](https://github.com/movie-tracker-bot/movie-tracker-bot/projects/1)
