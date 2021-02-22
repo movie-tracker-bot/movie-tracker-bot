@@ -13,15 +13,43 @@ class Formatter {
         return _.deburr(_.toLower(_.trim(value)))
     }
 
+    static removeScore(str) {
+        let score  = Formatter.getNumberOfString(str)
+        score = String(score)
+        var n = str.toLowerCase().lastIndexOf(score);
+        str = str.slice(0, n);
+        return str
+    }
+
     static getNumberOfString(str) {
         if (!str || typeof str !== 'string') {
             return null
         }
-        str = str.replace(/\D/g, '')
-        if (str.length <= 0) {
+
+        var n = Formatter.lastRegexIndexOf(str,/[0-9\.]+/g);
+        if (n < 0) {
             return null
         }
+        str = str.slice(n)
         return Number(str)
+    }
+
+    static lastRegexIndexOf(str, re){
+        var lastIndex = -2
+        for (let i = 0; i< str.length; i++){
+            let thisIndex = Formatter.regexIndexOf(str, re, i)
+            if (thisIndex-1 > lastIndex){
+                lastIndex = thisIndex
+            }
+        }
+        return lastIndex
+    }
+    static regexIndexOf(str, re, i) {
+        var indexInSuffix = str.slice(i).search(re)
+        if (indexInSuffix < 0){
+            return -1
+        }
+        return indexInSuffix + i
     }
 
     static getMedals(number) {

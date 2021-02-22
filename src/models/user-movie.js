@@ -28,7 +28,12 @@ class UserMovie {
                 this.id = existingUserMovie.id
                 this.user_id = existingUserMovie.user_id
                 this.movie_id = existingUserMovie.movie_id
-                this.watched = existingUserMovie.watched
+                if (this.watched && !existingUserMovie.watched){
+                    await this.updateWatched()
+                }
+                else{
+                    this.watched = existingUserMovie.watched
+                }
                 if (this.score && this.score != existingUserMovie.score){
                     this.updateScore()
                 }
@@ -94,7 +99,7 @@ class UserMovie {
             var userMovie = null
             if (result) {
                 var user = await User.findByTelegramId(user_telegram_id)
-                var movie = await Movie.findByImdbId(result.movie_id)
+                var movie = await Movie.findById(result.movie_id)
                 userMovie = new UserMovie(result.id, user, movie, result.watched, result.score)
             }
             db.close()
@@ -162,6 +167,17 @@ class UserMovie {
             console.log("An error occurred while trying to update movie score")
         }
         
+    }
+
+    async updateWatched(){
+        try {
+            const db = await Database.getDatabase()
+            await db.run(`UPDATE user_movie SET watched = ? WHERE id = ?;`, [this.watched, this.id]) 
+            db.close()
+        } catch (err) {
+            console.log(err)
+            console.log("An error occurred while trying to update movie watched")
+        }
     }
 }
 

@@ -255,9 +255,10 @@ class BotHandler {
             await next()
             return
         }
-
-        const movieName = Formatter.removeAccentsAndLowerCase(ctx.match[1])
+        var movieName =  Formatter.removeScore(ctx.match[1])
+        movieName = Formatter.toTitleCase(movieName) 
         const score = Formatter.getNumberOfString(ctx.match[1])
+
         if (!movieName || !score) {
             await ctx.reply('To add score please send movie name + score')
             return
@@ -266,52 +267,107 @@ class BotHandler {
             return
         }
 
-        const state = this.state[id] = {
-            movie_ix: 0,
-            movie_list: await ImdbService.getMovieByTitle(movieName),
+        const movie = await Movie.findByTitle(movieName)
+        if (!movie) {
+            const movieName = Formatter.removeAccentsAndLowerCase(ctx.match[1])
+            let movie_list = await ImdbService.getMovieByTitle(movieName)
+            var poster_url = null
+            if (movie_list[0].image){
+                poster_url = movie_list[0].image.url
+            }
+            const movie = new Movie(null,movie_list[0].id,movie_list[0].title,movie_list[0].year,poster_url)
+            await movie.createIfDoesntExist()
+            await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie,`The movie isn't in your list\nDo you want to add it and set it's score to ${score}?`)
+            var state = this.state[id] = {userId: id,
+                             movieName: movieName,
+                             score: score}
+            this.state[id].next = this.confirm.bind(
+                this,
+                async (ctx, state)=>{
+                    const userMovieDAO = new UserMovie(null, id, movie.id, true, score)
+                    userMovieDAO.createIfDoesntExist()
+                    await ctx.reply(`Saved score ${score} for ${movie.title}`)
+                    return true
+                },
+                async (ctx) =>{
+                    await ctx.reply(`Ok! This score won\'t be set to ${movie.title}, because it ain\'t on your list\nIf you want to score a movie other than the one suggested add it to your list first, using the /add command`)
+                    return true
+                },
+                async (ctx) =>{
+                    await ctx.reply(`Cancelling...\n
+                    If you want to score a movie other than the one suggested, add it to your list first, using the /add command`)
+                    return true
+                })
+            return
         }
 
-        BotHandler.askMovieConfirmation(ctx, state)
-
-        console.log(`Add Score: ${score} to ${movieName} for user ${id}`)
-        state.next = this.confirm.bind(
-            this,
-            async () => {
-                const movie = state.movie_list[state.movie_ix]
-                var poster_url = null
-                if (movie.image){
-                    poster_url = movie.image.url
-                }
-                
-                const movieDAO = new Movie(null, movie.id, movie.title, movie.year, poster_url)
-                await movieDAO.createIfDoesntExist()
-
-                const userMovieDAO = new UserMovie(null, ctx.from.id, movieDAO.id, true, score)
-                userMovieDAO.createIfDoesntExist()
-
-                await ctx.reply(`Save score ${score} for ${movie.title}`)
-
-                return true
-            },
-            async () => {
-                state.movie_ix++
-
-                if (state.movie_list.length == state.movie_ix) {
-                    await ctx.reply('Well, I ain\'t got any other suggestions...')
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(id,movie.id)
+        if (!userMovie){
+            await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `This movie isn\'t in your list\nDo you want to add it and set it\'s score to ${score}?`)
+            this.state[id] = {}
+            this.state[id].next = this.confirm.bind(
+                this,
+                async (ctx) => {
+                    const userMovieDAO = new UserMovie(null, id, movie.id, true, score)
+                    userMovieDAO.createIfDoesntExist()
+                    await ctx.reply(`Saved score ${score} for ${movie.title}`)
+                    return true
+                },
+                async (ctx) =>{
+                    await ctx.reply(`Ok! This score won\'t be set to ${movieName}, because it ain\'t on your list`)
+                    return true
+                },
+                async (ctx) =>{
+                    await ctx.reply(`Cancelling...`)
                     return true
                 }
-                else {
-                    BotHandler.askMovieConfirmation(ctx, state)
-                    return false
-                }
-            },
+            )
+            return
+        }
+
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `Do you want to set ${movieName}\'s score to ${score}?`)
+        this.state[id] = {}
+        this.state[id].next = this.confirm.bind(
+            this,
             async () => {
-                await ctx.reply('Cancelling...')
+                const userMovieDAO = new UserMovie(null, id, movie.id, true, score)
+                userMovieDAO.createIfDoesntExist()
+                await ctx.reply(`Saved score ${score} for ${movie.title}`)
+                return true
+            },
+            async () =>{
+                await ctx.reply(`Ok! This score won\'t be set to ${movieName}`)
+                return true
+            },
+            async () =>{
+                await ctx.reply(`Cancelling...`)
                 return true
             }
         )
+        return
     }
 
+    async scoreADatabaseMovie(ctx, state){
+        const movieName = state.movie.title
+        const movie = state.movie
+        const score = state.score
+        const user = state.userId
+
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `Is this the movie you want to set the score to ${score}?`)
+        this.state[user].next = this.confirm.bind(
+            this,
+            async() => {
+                const userMovieDAO = new UserMovie(null, user, movie.id, true, score)
+                userMovieDAO.createIfDoesntExist()
+
+                await ctx.reply(`Save score ${score} for ${movie.title}`)
+            },
+            async () => {
+                await ctx.reply(`Ok! ${movie.title} score wasn`)
+            }
+        )   
+    }
+    
     async removeMovie(ctx, next) {
         const user = ctx.from.id
 
@@ -330,8 +386,8 @@ class BotHandler {
             await ctx.reply(`The movie ${movieName} isn't in your list`)
             return
         }
-        const user_movie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.id)
-        if (!user_movie){
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.id)
+        if (!userMovie){
             await ctx.reply(`The movie ${movieName} isn't in your list`)
             return
         }
@@ -341,7 +397,7 @@ class BotHandler {
         this.state[user].next = this.confirm.bind(
             this,
             async (ctx) => {
-                await user_movie.delete()
+                await userMovie.delete()
                 await ctx.reply(`The movie ${movieName} was removed from your list!`)
                 return true
             },
