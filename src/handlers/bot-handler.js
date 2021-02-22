@@ -116,7 +116,12 @@ class BotHandler {
             async (ctx, state) => {
                 const movie = state.movie_list[state.movie_ix]
 
-                const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image.url)
+                var poster_url = null
+                if (movie.image){
+                    poster_url = movie.image.url
+                }
+
+                const movieDAO = new Movie(null, movie.id, movie.title, movie.year, poster_url)
                 await movieDAO.createIfDoesntExist()
 
                 const userMovieDAO = new UserMovie(null, ctx.from.id, movieDAO.id)
@@ -167,12 +172,12 @@ class BotHandler {
         await ctx.reply('Is this the correct movie?')
     }
 
-    static async askMovieFromDatabaseConfirmation(ctx, movie){
+    static async askMovieFromDatabaseConfirmation(ctx, movie, question = 'Is this the correct movie?'){
         await ctx.reply(movie.title)
         if (movie.poster_url){
             await ctx.replyWithPhoto(movie.poster_url)
         }
-        await ctx.reply('Is this the correct movie?')
+        await ctx.reply(question)
     }
 
     async confirm(positive, negative, cancel, ctx) {
@@ -273,8 +278,12 @@ class BotHandler {
             this,
             async () => {
                 const movie = state.movie_list[state.movie_ix]
-
-                const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image.url)
+                var poster_url = null
+                if (movie.image){
+                    poster_url = movie.image.url
+                }
+                
+                const movieDAO = new Movie(null, movie.id, movie.title, movie.year, poster_url)
                 await movieDAO.createIfDoesntExist()
 
                 const userMovieDAO = new UserMovie(null, ctx.from.id, movieDAO.id, true, score)
@@ -326,7 +335,7 @@ class BotHandler {
             await ctx.reply(`The movie ${movieName} isn't in your list`)
             return
         }
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie)
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie, "Are you sure you want to remove this movie from your list? This action can't be undone")
 
         this.state[user] = {}
         this.state[user].next = this.confirm.bind(
@@ -337,7 +346,7 @@ class BotHandler {
                 return true
             },
             async (ctx) =>{
-                await ctx.reply('Well, I ain\'t got any other suggestions...')
+                await ctx.reply(`Ok! ${movieName} will remain on your list`)
                 return true
             },
             async (ctx) =>{
