@@ -19,7 +19,7 @@ class MovieGenreList {
                 await genre.createIfDoesntExist()
             }
             let relation = new MovieGenreRelation(this.movie_id, genre.id)
-            relation.createIfDoesntExist()
+            await relation.createIfDoesntExist()
             this.genres.push(genre)
         } catch (err) {
             console.log(err)

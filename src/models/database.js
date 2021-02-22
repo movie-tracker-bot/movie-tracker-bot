@@ -35,7 +35,7 @@ class Database {
             })
                 .run(`CREATE TABLE IF NOT EXISTS user(
                     telegram_id INTEGER PRIMARY KEY,
-                    first_name TEXT NOT NULL);`, (err) => {
+                    first_name TEXT);`, (err) => {
                     if (err) {
                         console.log(err)
                         throw Error('An error occurred while creating the \'user\' table')

@@ -117,19 +117,19 @@ class BotHandler {
                 const movie = state.movie_list[state.movie_ix]
 
                 const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image.url)
-                movieDAO.createIfDoesntExist()
+                await movieDAO.createIfDoesntExist()
 
-                const userMovieDAO = new UserMovie(null, ctx.from.id, movie.id)
+                const userMovieDAO = new UserMovie(null, ctx.from.id, movieDAO.id)
                 userMovieDAO.createIfDoesntExist()
 
-                const movieGenreList = new MovieGenreList(movie.id)
+                const movieGenreList = new MovieGenreList(movieDAO.id)
                 const genres = await ImdbService.getMovieGenres(Formatter.getMovieId(movie.id))
 
                 for (const genre of genres) {
                     await movieGenreList.add(new Genre(null, genre))
                 }
 
-                await ctx.reply('Got it!')
+                await ctx.reply(`Got it! ${movie.title} added to your list!`)
 
                 return true
             },
@@ -275,9 +275,9 @@ class BotHandler {
                 const movie = state.movie_list[state.movie_ix]
 
                 const movieDAO = new Movie(null, movie.id, movie.title, movie.year, movie.image.url)
-                movieDAO.createIfDoesntExist()
+                await movieDAO.createIfDoesntExist()
 
-                const userMovieDAO = new UserMovie(null, ctx.from.id, movie.id, true, score)
+                const userMovieDAO = new UserMovie(null, ctx.from.id, movieDAO.id, true, score)
                 userMovieDAO.createIfDoesntExist()
 
                 await ctx.reply(`Save score ${score} for ${movie.title}`)
@@ -321,7 +321,7 @@ class BotHandler {
             await ctx.reply(`The movie ${movieName} isn't in your list`)
             return
         }
-        const user_movie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.imdb_id)
+        const user_movie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.id)
         if (!user_movie){
             await ctx.reply(`The movie ${movieName} isn't in your list`)
             return
@@ -333,7 +333,7 @@ class BotHandler {
             this,
             async (ctx) => {
                 await user_movie.delete()
-                await ctx.reply(`The movie ${movieName} was deleted!`)
+                await ctx.reply(`The movie ${movieName} was removed from your list!`)
                 return true
             },
             async (ctx) =>{
@@ -357,8 +357,8 @@ class BotHandler {
 
         const movies = await UserMovie.findMovieListByUserTelegramId(id)
         let response = ''
-        for (const movie of movies) {
-            response += `${movie.id} - ${movie.title}\n`
+        for (let i = 0; i< movies.length; i++) {
+            response += `${i+1} - ${movies[i].title}\n`
         }
         if (!response || response.length <= 0) {
             await ctx.reply('Your list is empty, you can add new movies using /add comand')
