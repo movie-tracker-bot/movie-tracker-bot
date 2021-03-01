@@ -42,6 +42,10 @@ class BotHandler {
                 pattern: / *?remove (.*)$/i,
                 handler: this.removeMovie,
             },
+            watched: {
+                pattern: / *?watched (.*)$/i,
+                handler: this.setWatched,
+            },
             list: {
                 pattern: / *?list$/i,
                 handler: this.getMovies,
@@ -49,7 +53,7 @@ class BotHandler {
             myRank: {
                 pattern: / *?myRank$/i,
                 handler: this.getRank,
-            }
+            },
         }
 
         for (let endpoint of Object.values(this.handlers)) {
@@ -454,6 +458,51 @@ class BotHandler {
         return
     }
 
+    async setWatched(ctx, next){
+        const userId = ctx.from.id
+
+        if (this.state[userId]){ // Previous action is still ongoing.
+            await next()
+            return
+        }
+
+        const movieName = Formatter.toTitleCase(ctx.match[1]) 
+        if (!movieName || movieName.length <= 0) {
+            await ctx.reply('To set a movie as watched, you must inform it\'s name')
+            return
+        }
+        const movie = await Movie.findByTitle(movieName)
+        if (!movie) {
+            await ctx.reply(`The movie ${movieName} isn't on your list`)
+            return
+        }
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(userId,movie.id)
+        if (!userMovie){
+            await ctx.reply(`The movie ${movieName} isn't on your list`)
+            return
+        }
+
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie, "Do you want to set this movie as watched?")
+        this.state[userId] = {}
+        this.state[userId].next = this.confirm.bind(
+            this,
+            async (ctx) => {
+                userMovie.watched = true
+                await userMovie.updateWatched()
+                await ctx.reply(`The movie ${movieName} is now set as watched!`)
+                return true
+            },
+            async (ctx) =>{
+                await ctx.reply(`Ok! ${movieName} will remain unwatched`)
+                return true
+            },
+            async (ctx) =>{
+                await ctx.reply('Cancelling...')
+                return true
+            }  
+        )
+
+    }
     async launch() {
         await this.telegraf.launch()
     }
