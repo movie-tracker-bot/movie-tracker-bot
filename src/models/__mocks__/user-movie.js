@@ -35,7 +35,7 @@ class UserMovie {
         // TODO.
     }
 
-    static async findRandomByUserTelegramId(user_telegram_id) {
+    static async findUnwatchedRandomByTelegramId(user_telegram_id) {
         return UserMovie.saved[0]
     }
     /**

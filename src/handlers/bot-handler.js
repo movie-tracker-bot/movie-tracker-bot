@@ -233,7 +233,7 @@ class BotHandler {
 
         console.log('Rand command')
 
-        const userMovie = await UserMovie.findRandomByUserTelegramId(user)
+        const userMovie = await UserMovie.findUnwatchedRandomByTelegramId(user)
 
         if (userMovie) {
             const movie = userMovie.movie_id
@@ -247,7 +247,7 @@ class BotHandler {
             await ctx.reply('Have a nice movie :)')
         }
         else {
-            await ctx.reply('You don\'t have any movies in you list :(')
+            await ctx.reply('You don\'t have any unwatched movies in you list :(')
             await ctx.reply('Try adding some with the \'add\' command.')
         }
     }
