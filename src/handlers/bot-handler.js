@@ -47,7 +47,7 @@ class BotHandler {
                 handler: this.setWatched,
             },
             list: {
-                pattern: / *list$/i,
+                pattern: / *list *(.*?) *$/i,
                 handler: this.getMovies,
             },
             myRank: {
@@ -412,9 +412,10 @@ class BotHandler {
             async (ctx) =>{
                 await ctx.reply('Cancelling...')
                 return true
-            }  
+            }
         )
     }
+
 
     async getMovies(ctx, next) {
         const id = ctx.from.id
@@ -424,19 +425,66 @@ class BotHandler {
             return
         }
 
-        const movies = await UserMovie.findMovieListByUserTelegramId(id)
-        let response = ''
-        for (let i = 0; i< movies.length; i++) {
-            response += `${i+1} - ${movies[i].title}\n`
-        }
-        if (!response || response.length <= 0) {
-            await ctx.reply('Your list is empty, you can add new movies using /add comand')
-            return
-        }
-        await ctx.reply(response)
-        return
+        const user = new User(ctx.from.id, ctx.from.username)
+        const movieListService = new MovieListService(user)
+        let movies
 
+        const option = ctx.match[1]
+
+        switch (option) {
+            case 'all': {
+                movies = await movieListService.getList()
+
+                if (movies.length == 0) {
+                    await ctx.reply(
+                        'Your list is empty, you can add new movies using the /add comand'
+                    )
+                    return
+                }
+
+                break
+            }
+            case 'watched': {
+                movies = await movieListService.getList(true)
+
+                if (movies.length == 0) {
+                    await ctx.reply(
+                        'There are no watched movies, you can mark a movie as watched with the /watched comand'
+                    )
+                    return
+                }
+
+                break
+            }
+            case 'unwatched': {
+                movies = await movieListService.getList(false)
+
+                if (movies.length == 0) {
+                    await ctx.reply(
+                        'There are no unwatched movies, you can add new movies using the /add comand'
+                    )
+                    return
+                }
+
+                break
+            }
+            default: {
+                await ctx.reply('Sorry, I don\'t understand.')
+                return
+            }
+        }
+
+        let response = ''
+        let watched_emojis = [ '🎞', '✔' ]
+
+        for (let movie of movies) {
+            let watched = movie.watched ? 1 : 0
+            response += `${watched_emojis[watched]} ${movie.title}\n`
+        }
+
+        await ctx.reply(response)
     }
+
 
     async getRank(ctx, next) {
         const id = ctx.from.id
@@ -482,7 +530,7 @@ class BotHandler {
             return
         }
 
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie, "Do you want to set this movie as watched?")
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie, 'Do you want to set this movie as watched?')
         this.state[userId] = {}
         this.state[userId].next = this.confirm.bind(
             this,
