@@ -2,15 +2,15 @@ const UserMovie = require('../models/user-movie')
 
 class MovieListService {
     /**
-     * 
-     * @param {User} user 
+     *
+     * @param {User} user
      */
     constructor(user = null) {
         this.user = user
         this.movieList = []
     }
     /**
-     * 
+     *
      * @param {number} maxLength - lenght of list. If null, will get full list
      * @param {boolean} watched - if list is of watched or unwatched movies, if null will get both
      */
@@ -27,8 +27,8 @@ class MovieListService {
         return this.movieList
     }
     /**
-     * 
-     * @param {Genre} genre 
+     *
+     * @param {Genre} genre
      * @param {Number} maxLength - lenght of list. If null, will get full list
      * @param {Boolean} watched - if list is of watched or unwatched movies, if null will get both
      */
@@ -36,8 +36,8 @@ class MovieListService {
 
     }
     /**
-     * 
-     * @param {Genre} genre 
+     *
+     * @param {Genre} genre
      */
     async filterByGenre(genre) {
 
