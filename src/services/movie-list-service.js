@@ -21,22 +21,6 @@ class MovieListService {
             return await UserMovie.findMovieListByUserTelegramIdAndWatched(this.user.telegram_id, watched)
         }
     }
-    /**
-     *
-     * @param {Genre} genre
-     * @param {Number} maxLength - lenght of list. If null, will get full list
-     * @param {Boolean} watched - if list is of watched or unwatched movies, if null will get both
-     */
-    async getListByGenre(genre, maxLength = 10, watched = null) {
-
-    }
-    /**
-     *
-     * @param {Genre} genre
-     */
-    async filterByGenre(genre) {
-
-    }
 
     /**
      * @param {Number} maxLength - lenght of list. If null, will get full list

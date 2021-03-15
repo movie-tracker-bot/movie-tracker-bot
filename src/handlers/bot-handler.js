@@ -425,60 +425,53 @@ class BotHandler {
             return
         }
 
+        console.log('List command')
+
+        const options = ctx.match[1].split(' ')
+
+        if (options.length > 2) {
+            await ctx.reply('Sorry, I don\'t understand.')
+            return
+        }
+
+        // We may only use toLowerCase here because all commands contain only ASCII characters.
+        const type = options[0].toLowerCase()
+        const genre = options[1]
+
         const user = new User(ctx.from.id, ctx.from.username)
         const movieListService = new MovieListService(user)
-        let movies
 
-        const option = ctx.match[1]
+        let getters = {
+            all:       () => movieListService.getList(),
+            watched:   () => movieListService.getList(true),
+            unwatched: () => movieListService.getList(false)
+        }
 
-        switch (option) {
-            case 'all': {
-                movies = await movieListService.getList()
+        if (!getters.hasOwnProperty(type)) { // Invalid type.
+            await ctx.reply('Sorry, I don\'t understand.')
+            return
+        }
 
-                if (movies.length == 0) {
-                    await ctx.reply(
-                        'Your list is empty, you can add new movies using the /add comand'
-                    )
-                    return
-                }
+        let movies = await getters[type]();
 
-                break
-            }
-            case 'watched': {
-                movies = await movieListService.getList(true)
+        if (genre) {
+            movies = movies.filter(
+                movie => movie.genreList.contains(genre)
+            )
+        }
 
-                if (movies.length == 0) {
-                    await ctx.reply(
-                        'There are no watched movies, you can mark a movie as watched with the /watched comand'
-                    )
-                    return
-                }
-
-                break
-            }
-            case 'unwatched': {
-                movies = await movieListService.getList(false)
-
-                if (movies.length == 0) {
-                    await ctx.reply(
-                        'There are no unwatched movies, you can add new movies using the /add comand'
-                    )
-                    return
-                }
-
-                break
-            }
-            default: {
-                await ctx.reply('Sorry, I don\'t understand.')
-                return
-            }
+        if (movies.length == 0) {
+            await ctx.reply(
+                'There are no movies matching this criteria! You can add new movies using the /add comand'
+            )
+            return
         }
 
         let response = ''
-        let watched_emojis = [ '🎞', '✔' ]
+        const watched_emojis = [ '🎞', '✔' ]
 
         for (let movie of movies) {
-            let watched = movie.watched ? 1 : 0
+            const watched = movie.watched ? 1 : 0
             response += `${watched_emojis[watched]} ${movie.title}\n`
         }
 
