@@ -109,10 +109,13 @@ class MovieGenreRelation {
             let results = await db.all('SELECT * FROM movie_genre WHERE movie_id = ?', [movie_id])
             var genres = []
             if (Array.isArray(results)) {
-                results.forEach(async (result) => {
-                    let genre = await Genre.findById(result.genre_id)
-                    genres.push(genre)
-                })
+                let promises = results.map(
+                    async (result) => {
+                        let genre = await Genre.findById(result.genre_id)
+                        genres.push(genre)
+                    }
+                )
+                await Promise.all(promises);
             }
             db.close()
             return genres
