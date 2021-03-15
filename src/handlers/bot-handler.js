@@ -260,7 +260,7 @@ class BotHandler {
             return
         }
         var movieName =  Formatter.removeScore(ctx.match[1])
-        movieName = Formatter.toTitleCase(movieName) 
+        movieName = Formatter.toTitleCase(movieName)
         const score = Formatter.getNumberOfString(ctx.match[1])
 
         if (!movieName || !score) {
@@ -369,9 +369,9 @@ class BotHandler {
             async () => {
                 await ctx.reply(`Ok! ${movie.title} score wasn`)
             }
-        )   
+        )
     }
-    
+
     async removeMovie(ctx, next) {
         const user = ctx.from.id
 
@@ -380,7 +380,7 @@ class BotHandler {
             return
         }
 
-        const movieName = Formatter.toTitleCase(ctx.match[1]) 
+        const movieName = Formatter.toTitleCase(ctx.match[1])
         if (!movieName || movieName.length <= 0) {
             await ctx.reply('To remove a movie, you must inform the name')
             return
@@ -514,7 +514,7 @@ class BotHandler {
             return
         }
 
-        const movieName = Formatter.toTitleCase(ctx.match[1]) 
+        const movieName = Formatter.toTitleCase(ctx.match[1])
         if (!movieName || movieName.length <= 0) {
             await ctx.reply('To set a movie as watched, you must inform it\'s name')
             return
@@ -547,7 +547,7 @@ class BotHandler {
             async (ctx) =>{
                 await ctx.reply('Cancelling...')
                 return true
-            }  
+            }
         )
 
     }
