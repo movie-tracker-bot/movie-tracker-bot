@@ -27,7 +27,7 @@ class BotHandler {
 
         this.handlers = {
             add: {
-                pattern: /^ *add (.*)$/i,
+                pattern: /^ *add +(.*)$/i,
                 handler: this.addMovie,
             },
             rand: {
@@ -35,19 +35,19 @@ class BotHandler {
                 handler: this.randMovie,
             },
             score: {
-                pattern: /^ *score (.*)$/i,
+                pattern: /^ *score +(.*)$/i,
                 handler: this.setScore,
             },
             remove: {
-                pattern: /^ *remove (.*)$/i,
+                pattern: /^ *remove +(.*)$/i,
                 handler: this.removeMovie,
             },
             watched: {
-                pattern: /^ *watched (.*)$/i,
+                pattern: /^ *watched +(.*)$/i,
                 handler: this.setWatched,
             },
             list: {
-                pattern: /^ *list *(.*?) *$/i,
+                pattern: /^ *list +(.*?) *$/i,
                 handler: this.getMovies,
             },
             myRank: {
