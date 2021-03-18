@@ -1,6 +1,7 @@
 const { Telegraf } = require('telegraf')
 const BotHandler = require('../handlers/bot-handler')
 const Movie = require('../models/movie')
+const Genre = require('../models/genre')
 const User = require('../models/user')
 const UserMovie = require('../models/user-movie')
 jest.mock('../models/user')
@@ -186,6 +187,9 @@ test(
             'rand',
             '   rand',
             '   rand   ',
+            'rand horror',
+            '   rand sci-fi',
+            '   rand   drama',
         ]
 
         const shouldNotMatch = [
@@ -226,6 +230,44 @@ test(
         expect(replies.photos.length).toEqual(1)
         expect(replies.text).toEqual(
             expect.arrayContaining(['random movie'])
+        )
+    }
+)
+
+
+test(
+    'test rand movie genre',
+    async () => {
+        let replies = await telegraf.sendMessage('rand horror')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text.length).toBeGreaterThan(0)
+
+        let user = new User(1, 'random user')
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        let genre = new Genre(1, 'horror')
+        movie.genreList.add(genre)
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, 5)
+        await userMovie.save()
+
+        let movie2 = new Movie(2, 'random_id2', 'random movie 2', 1338, 'random movie image.jpg')
+        let genre2 = new Genre(2, 'Sci-Fi')
+        movie2.genreList.add(genre2)
+        movie2.save()
+
+        let userMovie2 = new UserMovie(2, user, movie2, false, 5)
+        await userMovie2.save()
+
+        replies = await telegraf.sendMessage('rand sci-fi')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(1)
+        expect(replies.text).toEqual(
+            expect.arrayContaining(['random movie 2'])
         )
     }
 )

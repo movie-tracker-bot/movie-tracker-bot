@@ -1,3 +1,4 @@
+const Utils = require('../../helpers/utils')
 const User = require('./user')
 const Movie = require('./movie')
 
@@ -37,6 +38,16 @@ class UserMovie {
 
     static async findUnwatchedRandomByTelegramId(user_telegram_id) {
         return UserMovie.saved[0]
+    }
+
+    static async findUnwatchedRandomByTelegramIdAndGenre(user_telegram_id, genre_name) {
+        return UserMovie.saved.find(
+            user_movie => {
+                return user_movie.movie_id.genreList.genres.some(
+                    genre => Utils.StringEqualsIgnoreCase(genre.name, genre_name)
+                )
+            }
+        )
     }
     /**
     /**

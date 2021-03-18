@@ -6,7 +6,7 @@ class MovieGenreList {
         this.genres = []
     }
     async getGenres() {
-        // TODO
+        // Do nothing.
     }
     async add(genre) {
         let idx = this.genres.indexOf(genre)

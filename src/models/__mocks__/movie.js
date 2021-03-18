@@ -1,3 +1,6 @@
+const Genre = require('./genre')
+const MovieGenreList = require('./movie-genre-list')
+
 class Movie {
     static saved = [];
 
@@ -14,7 +17,7 @@ class Movie {
         this.title = title
         this.year = year
         this.poster_url = poster_url
-        this.genreList = null
+        this.genreList = new MovieGenreList(this.id)
     }
 
 
@@ -48,8 +51,7 @@ class Movie {
     }
 
     async fillGenreList() {
-        // TODO
-        return null
+        // Do nothing, because this mock sets the genre list in the constructor.
     }
 }
 
