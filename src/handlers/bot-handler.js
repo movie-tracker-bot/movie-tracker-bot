@@ -31,7 +31,7 @@ class BotHandler {
                 handler: this.addMovie,
             },
             rand: {
-                pattern: /^ *rand$/i,
+                pattern: /^ *rand( +(.*?))? *$/i,
                 handler: this.randMovie,
             },
             score: {
@@ -233,7 +233,13 @@ class BotHandler {
 
         console.log('Rand command')
 
-        const userMovie = await UserMovie.findUnwatchedRandomByTelegramId(user)
+        const genre = ctx.match[2]
+
+        const userMovie = await (
+            genre
+                ? UserMovie.findUnwatchedRandomByTelegramIdAndGenre(user, genre)
+                : UserMovie.findUnwatchedRandomByTelegramId(user)
+        )
 
         if (userMovie) {
             const movie = userMovie.movie_id

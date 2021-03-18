@@ -185,12 +185,10 @@ test(
         const shouldMatch = [
             'rand',
             '   rand',
-            '/rand',
-            ' /rand',
+            '   rand   ',
         ]
 
         const shouldNotMatch = [
-            'rand movie',
             'randmovie',
             'rad',
             'raand',

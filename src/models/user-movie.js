@@ -1,6 +1,7 @@
 const Database = require('./database')
 const User = require('./user')
 const Movie = require('./movie')
+const Genre = require('./genre')
 
 class UserMovie {
     /**
@@ -112,6 +113,43 @@ class UserMovie {
             console.log('An error occurred while consulting movie in user list')
         }
     }
+
+    static async findUnwatchedRandomByTelegramIdAndGenre(user_telegram_id, genre) {
+        try {
+            const db = await Database.getDatabase()
+
+            const genreObj = await Genre.findByName(genre)
+
+            if (!genreObj) {
+                return null
+            }
+
+            let result = await db.get(
+                `select um.id, um.movie_id, um.watched, um.score
+                 from user_movie as um
+                 inner join movie_genre as mg
+                 on um.movie_id = mg.movie_id
+                 where um.user_id = ?
+                   and um.watched = 0
+                   and mg.genre_id = ?
+                 order by random()
+                 limit 1`,
+                [user_telegram_id, genreObj.id]
+            )
+            var userMovie = null
+            if (result) {
+                var user = await User.findByTelegramId(user_telegram_id)
+                var movie = await Movie.findById(result.movie_id)
+                userMovie = new UserMovie(result.id, user, movie, result.watched, result.score)
+            }
+            db.close()
+            return userMovie
+        } catch (err) {
+            console.log(err)
+            console.log('An error occurred while consulting movie in user list')
+        }
+    }
+
     /**
     /**
      * 

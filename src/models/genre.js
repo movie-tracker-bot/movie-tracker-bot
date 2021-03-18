@@ -43,7 +43,7 @@ class Genre {
     static async findByName(name) {
         try {
             const db = await Database.getDatabase()
-            let result = await db.get('SELECT * FROM genre WHERE name = ?', [name])
+            let result = await db.get('SELECT * FROM genre WHERE name = ? COLLATE NOCASE', [name])
             var genre = null
             if (result) {
                 genre = new Genre(result.id, result.name)
