@@ -55,7 +55,17 @@ class UserMovie {
      * @param {Number} user_telegram_id 
      */
     static async findMovieListByUserTelegramId(user_telegram_id) {
-        // TODO.
+        return UserMovie.saved
+            .filter(
+                user_movie => user_movie.user_id.telegram_id == user_telegram_id
+            )
+            .map(
+                user_movie => {
+                    let movie = user_movie.movie_id
+                    movie.watched = user_movie.watched
+                    return movie
+                }
+            )
     }
 
     /**
@@ -64,7 +74,18 @@ class UserMovie {
      * @param {Boolean} watched 
      */
     static async findMovieListByUserTelegramIdAndWatched(user_telegram_id, watched) {
-        // TODO.
+        return UserMovie.saved
+            .filter(
+                user_movie => user_movie.watched == watched
+                           && user_movie.user_id.telegram_id == user_telegram_id
+            )
+            .map(
+                user_movie => {
+                    let movie = user_movie.movie_id
+                    movie.watched = user_movie.watched
+                    return movie
+                }
+            )
     }
 
 }

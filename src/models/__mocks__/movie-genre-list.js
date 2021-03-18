@@ -1,4 +1,5 @@
 const Genre = require('./genre')
+const Util = require('../../helpers/utils')
 
 class MovieGenreList {
     constructor(movie_id) {
@@ -17,6 +18,19 @@ class MovieGenreList {
     }
     async remove(genre) {
         // TODO
+    }
+    /**
+     * Check if the list contains a given genre by name, case-insensitive.
+     * @param {string} name The genre's name
+     */
+    contains(name) {
+        for (let genre of this.genres) {
+            if (Util.StringEqualsIgnoreCase(genre.name, name)) {
+                return true
+            }
+        }
+
+        return false
     }
 }
 
