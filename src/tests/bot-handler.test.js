@@ -4,14 +4,13 @@ const Movie = require('../models/movie')
 const Genre = require('../models/genre')
 const User = require('../models/user')
 const UserMovie = require('../models/user-movie')
+
 jest.mock('../models/user')
 jest.mock('../models/movie')
 jest.mock('../models/user-movie')
 jest.mock('../models/genre')
 jest.mock('../models/movie-genre-list')
 jest.mock('../services/imdb-service')
-
-
 
 const telegraf = new Telegraf('token')
 const bot = new BotHandler(telegraf)
@@ -30,7 +29,6 @@ beforeEach(() => {
     UserMovie.reset()
 })
 
-
 test(
     'test start message',
     async () => {
@@ -43,7 +41,6 @@ test(
         expect(Movie.saved.length).toEqual(0)
     }
 )
-
 
 test(
     'test add endpoint pattern',
@@ -74,7 +71,6 @@ test(
     }
 )
 
-
 test(
     'test add movie',
     async () => {
@@ -104,7 +100,6 @@ test(
     }
 )
 
-
 test(
     'test cancel add movie',
     async () => {
@@ -133,7 +128,6 @@ test(
         expect(Movie.saved.length).toEqual(0)
     }
 )
-
 
 test(
     'test fail to add movie',

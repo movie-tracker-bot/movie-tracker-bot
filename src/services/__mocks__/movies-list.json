@@ -1,0 +1,41 @@
+[
+    {
+        "id": 2,
+        "imdb_id": "/title/tt0241527/",
+        "title": "Harry Potter and the Sorcerer's Stone",
+        "year": 2001,
+        "poster_url": "https://m.media-amazon.com/images/M/MV5BNjQ3NWNlNmQtMTE5ZS00MDdmLTlkZjUtZTBlM2UxMGFiMTU3XkEyXkFqcGdeQXVyNjUwNzk3NDc@._V1_.jpg",
+        "genreList": {
+            "movie_id": 2,
+            "genres": [
+                {
+                    "id": 5,
+                    "name": "Family"
+                },
+                {
+                    "id": 4,
+                    "name": "Adventure"
+                },
+                {
+                    "id": 2,
+                    "name": "Fantasy"
+                }
+            ]
+        },
+        "score": 10,
+        "watched": 1
+    },
+    {
+        "id": 10,
+        "imdb_id": "/title/tt1586727/",
+        "title": "Crepuscule",
+        "year": 2009,
+        "poster_url": "https://m.media-amazon.com/images/M/MV5BZjNjNTQ0NDYtNjhiNS00MTEzLWE0MzgtMWZjZjE4NzczMjNlL2ltYWdlL2ltYWdlXkEyXkFqcGdeQXVyMTE4MTE1NDk@._V1_.jpg",
+        "genreList": {
+            "movie_id": 10,
+            "genres": []
+        },
+        "score": 2,
+        "watched": 1
+    }
+]

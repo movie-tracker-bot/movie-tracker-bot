@@ -74,9 +74,16 @@ describe('Test Get Number Of String', function () {
         const data = Formatter.getNumberOfString('A musica 33')
         expect(data).toEqual(Number(33))
     })
-    it('Test with a invalid string', async function () {
+    it('Test with a string only numbers', async function () {
         const data = Formatter.getNumberOfString('48')
         expect(data).toEqual(Number(48))
     })
-
+    it('Test with a number', async function () {
+        const data = Formatter.getNumberOfString(Number(48))
+        expect(data).toEqual(null)
+    })
+    it('Test with a string without number', async function () {
+        const data = Formatter.getNumberOfString('A ultima musica')
+        expect(data).toEqual(null)
+    })
 })
