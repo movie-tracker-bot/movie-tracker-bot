@@ -28,12 +28,12 @@ describe('Get Medal in Rank', function () {
 })
 
 describe('test Title Case', function () {
-    it('Test title case', async function () {
+    it('Test with a valid string', async function () {
         const data = Formatter.toTitleCase('lua nova')
         expect(data).toEqual('Lua Nova')
     })
 
-    it('Test title case', async function () {
+    it('Test with a invalid string', async function () {
         const data = Formatter.toTitleCase(null)
         expect(data).toEqual(undefined)
     })
