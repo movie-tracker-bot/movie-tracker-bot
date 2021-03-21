@@ -30,8 +30,16 @@ class BotHandler {
                 pattern: /^ *[/]?add +(.*)$/i,
                 handler: this.addMovie,
             },
+            adicionar: {
+                pattern: / *?adicionar (.*)$/i,
+                handler: this.addMovie,
+            },
             rand: {
                 pattern: /^ *[/]?rand( +(.*?))? *$/i,
+                handler: this.randMovie,
+            },
+            random: {
+                pattern: / *?random$/i,
                 handler: this.randMovie,
             },
             score: {
@@ -40,6 +48,10 @@ class BotHandler {
             },
             remove: {
                 pattern: /^ *[/]?remove +(.*)$/i,
+                handler: this.removeMovie,
+            },
+            rm: {
+                pattern: / *?rm (.*)$/i,
                 handler: this.removeMovie,
             },
             watched: {
@@ -81,7 +93,6 @@ class BotHandler {
 
     async text(ctx) {
         console.log(`text handler: ${ctx.message.text}`)
-
         const user = ctx.from.id
 
         if (this.state[user]) {
@@ -121,7 +132,7 @@ class BotHandler {
                 const movie = state.movie_list[state.movie_ix]
 
                 var poster_url = null
-                if (movie.image){
+                if (movie.image) {
                     poster_url = movie.image.url
                 }
 
@@ -176,9 +187,9 @@ class BotHandler {
         await ctx.reply('Is this the correct movie?')
     }
 
-    static async askMovieFromDatabaseConfirmation(ctx, movie, question = 'Is this the correct movie?'){
+    static async askMovieFromDatabaseConfirmation(ctx, movie, question = 'Is this the correct movie?') {
         await ctx.reply(Formatter.toTitleCase(movie.title))
-        if (movie.poster_url){
+        if (movie.poster_url) {
             await ctx.replyWithPhoto(movie.poster_url)
         }
         await ctx.reply(question)
@@ -244,6 +255,10 @@ class BotHandler {
         if (userMovie) {
             const movie = userMovie.movie_id
 
+            if (!movie) {
+                await ctx.reply('Sorry I didn\'t found a movie for you :()')
+                return
+            }
             await ctx.reply(Formatter.toTitleCase(movie.title))
 
             if (movie.poster_url) {
@@ -265,7 +280,7 @@ class BotHandler {
             await next()
             return
         }
-        var movieName =  Formatter.removeScore(ctx.match[1])
+        var movieName = Formatter.removeScore(ctx.match[1])
         movieName = movieName.toLowerCase()
         const score = Formatter.getNumberOfString(ctx.match[1])
 
@@ -283,8 +298,8 @@ class BotHandler {
             return
         }
 
-        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(id,movie.id)
-        if (!userMovie){
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(id, movie.id)
+        if (!userMovie) {
             await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
             return
         }
@@ -299,11 +314,11 @@ class BotHandler {
                 await ctx.reply(`Saved score ${score} for ${Formatter.toTitleCase(movie.title)}`)
                 return true
             },
-            async () =>{
+            async () => {
                 await ctx.reply(`Ok! This score won\'t be set to ${Formatter.toTitleCase(movieName)}`)
                 return true
             },
-            async () =>{
+            async () => {
                 await ctx.reply(`Cancelling...`)
                 return true
             }
@@ -330,12 +345,12 @@ class BotHandler {
             await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
             return
         }
-        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.id)
-        if (!userMovie){
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(user, movie.id)
+        if (!userMovie) {
             await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
             return
         }
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie, "Are you sure you want to remove this movie from your list? This action can't be undone")
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, "Are you sure you want to remove this movie from your list? This action can't be undone")
 
         this.state[user] = {}
         this.state[user].next = this.confirm.bind(
@@ -345,11 +360,11 @@ class BotHandler {
                 await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} was removed from your list!`)
                 return true
             },
-            async (ctx) =>{
+            async (ctx) => {
                 await ctx.reply(`Ok! ${Formatter.toTitleCase(movieName)} will remain on your list`)
                 return true
             },
-            async (ctx) =>{
+            async (ctx) => {
                 await ctx.reply('Cancelling...')
                 return true
             }
@@ -382,10 +397,10 @@ class BotHandler {
         const movieListService = new MovieListService(user)
 
         let getters = {
-            all:       () => movieListService.getList(),
-            watched:   () => movieListService.getList(true),
+            all: () => movieListService.getList(),
+            watched: () => movieListService.getList(true),
             unwatched: () => movieListService.getList(false),
-            scored:    () => movieListService.getList(null, true)
+            scored: () => movieListService.getList(null, true)
         }
 
         if (!getters.hasOwnProperty(type)) { // Invalid type.
@@ -409,20 +424,20 @@ class BotHandler {
         }
 
         let response = ''
-        const watched_emojis = [ '🎞', '✔' ]
-        if (type == 'scored'){
+        const watched_emojis = ['🎞', '✔']
+        if (type == 'scored') {
             for (let movie of movies) {
                 const watched = movie.watched ? 1 : 0
                 response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)} - Your score: ${movie.score}\n`
             }
         }
-        else{
+        else {
             for (let movie of movies) {
                 const watched = movie.watched ? 1 : 0
                 response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)}\n`
             }
         }
-        
+
 
         await ctx.reply(response)
     }
@@ -448,10 +463,10 @@ class BotHandler {
         return
     }
 
-    async setWatched(ctx, next){
+    async setWatched(ctx, next) {
         const userId = ctx.from.id
 
-        if (this.state[userId]){ // Previous action is still ongoing.
+        if (this.state[userId]) { // Previous action is still ongoing.
             await next()
             return
         }
@@ -467,13 +482,13 @@ class BotHandler {
             await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
             return
         }
-        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(userId,movie.id)
-        if (!userMovie){
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(userId, movie.id)
+        if (!userMovie) {
             await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
             return
         }
 
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie, 'Do you want to set this movie as watched?')
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, 'Do you want to set this movie as watched?')
         this.state[userId] = {}
         this.state[userId].next = this.confirm.bind(
             this,
@@ -483,11 +498,11 @@ class BotHandler {
                 await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} is now set as watched!`)
                 return true
             },
-            async (ctx) =>{
+            async (ctx) => {
                 await ctx.reply(`Ok! ${Formatter.toTitleCase(movieName)} will remain unwatched`)
                 return true
             },
-            async (ctx) =>{
+            async (ctx) => {
                 await ctx.reply('Cancelling...')
                 return true
             }

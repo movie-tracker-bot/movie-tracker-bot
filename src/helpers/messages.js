@@ -1,7 +1,6 @@
-const Formatter = require("./formatter")
+const Formatter = require('./formatter')
 
 class Menssages {
-
     static welcomeMessage() {
         return `Welcome to the movie tracker! Here you can manage your movie list and get recommendations for movies. These are all available commands:
         /add + movie name to add to your list.
@@ -10,7 +9,7 @@ class Menssages {
         /watched + movie name to set a movie as watched
         /list + (all|watched|unwatched|scored) + genre to list your movies
         /rand to get a random recommendation
-        /myRank to see your rank `
+        /myRank to see your rank`
     }
 
     static rankMovieMessage(movies) {
