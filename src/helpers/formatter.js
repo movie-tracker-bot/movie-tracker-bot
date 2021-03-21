@@ -69,6 +69,9 @@ class Formatter {
     }
 
     static toTitleCase(string) {
+        if (typeof string !== 'string') {
+            return undefined
+        }
         return _.startCase(_.camelCase(string))
     }
 }
