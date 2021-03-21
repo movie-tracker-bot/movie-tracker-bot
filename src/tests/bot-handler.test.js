@@ -421,6 +421,69 @@ test(
     }
 )
 
+test('test list scored', async() =>{
+        let replies = await telegraf.sendMessage('list all')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text.length).toEqual(1)
+
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        let genre = new Genre(1, 'Horror')
+        movie.genreList.add(genre)
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, 5)
+        await userMovie.save()
+
+        let movie2 = new Movie(2, 'random_id2', 'random movie 2', 1338, 'random movie image.jpg')
+        let genre2 = new Genre(2, 'Sci-Fi')
+        movie2.genreList.add(genre2)
+        movie2.save()
+
+        let userMovie2 = new UserMovie(2, user, movie2, true, null)
+        await userMovie2.save()
+
+        replies = await telegraf.sendMessage('list all')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos).toEqual([])
+        expect(replies.text).toEqual(
+            [
+                '🎞 random movie\n✔ random movie 2\n'
+            ]
+        )
+
+        replies = await telegraf.sendMessage('list scored')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos).toEqual([])
+        expect(replies.text).toEqual(
+            [
+                '🎞 random movie - Your score: 5\n'
+            ]
+        )
+
+        replies = await telegraf.sendMessage('list scored sci-fi')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos).toEqual([])
+        expect(replies.text.length).toEqual(1)
+
+        replies = await telegraf.sendMessage('list scored horror')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos).toEqual([])
+        expect(replies.text).toEqual(
+            [
+                '🎞 random movie - Your score: 5\n'
+            ]
+        )
+    }
+)
 
 test(
     'test invalid list command',
@@ -442,5 +505,71 @@ test(
         expect(replies.markdown).toEqual([])
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual([ 'Sorry, I don\'t understand.' ])
+    }
+)
+
+test(
+    'test set movie as watched',
+    async () =>{
+        let replies = await telegraf.sendMessage('list all')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text.length).toEqual(1)
+
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'Random Movie', 1337, 'random movie image.jpg')
+        let genre = new Genre(1, 'Horror')
+        movie.genreList.add(genre)
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, 5)
+        await userMovie.save()
+        replies = await telegraf.sendMessage('watched random movie')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text[1]).toEqual('Do you want to set this movie as watched?')
+        
+        replies = await telegraf.sendMessage('nah')
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text).toEqual(['Ok! Random Movie will remain unwatched'])
+
+    }
+)
+
+test(
+    'test cancel set movie as watched',
+    async () =>{
+        let replies = await telegraf.sendMessage('list all')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text.length).toEqual(1)
+
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'Random Movie', 1337, 'random movie image.jpg')
+        let genre = new Genre(1, 'Horror')
+        movie.genreList.add(genre)
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, 5)
+        await userMovie.save()
+        replies = await telegraf.sendMessage('watched random movie')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text[1]).toEqual('Do you want to set this movie as watched?')
+        
+        replies = await telegraf.sendMessage('nvm')
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text).toEqual(['Cancelling...'])
+
     }
 )

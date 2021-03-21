@@ -38,8 +38,10 @@ class Movie {
      * @param {string} imdb_id
      */
     static async findByImdbId(imdb_id) {
-        // TODO
-        return null
+        return Movie.saved
+        .filter(
+            movie => movie.imdb_id === imdb_id
+        )
     }
 
     /**
@@ -52,6 +54,13 @@ class Movie {
 
     async fillGenreList() {
         // Do nothing, because this mock sets the genre list in the constructor.
+    }
+
+    static async findByTitle(title) {
+        return Movie.saved
+        .filter(
+            movie => movie.title === title
+        )
     }
 }
 

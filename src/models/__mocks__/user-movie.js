@@ -32,8 +32,16 @@ class UserMovie {
         UserMovie.saved.push(this)
     }
 
+    async updateWatched() {
+        //do nothing
+    }
+
     static async findByUserTelegramIdAndMovieId(user_telegram_id, movie_id) {
-        // TODO.
+        return UserMovie.saved
+        .filter(
+            user_movie => user_movie.user_id.telegram_id == user_telegram_id &&
+                             user_movie.movie_id.id == movie_id
+        )
     }
 
     static async findUnwatchedRandomByTelegramId(user_telegram_id) {
@@ -49,7 +57,7 @@ class UserMovie {
             }
         )
     }
-    /**
+
     /**
      * 
      * @param {Number} user_telegram_id 
@@ -86,6 +94,24 @@ class UserMovie {
                     return movie
                 }
             )
+    }
+    /**
+     * 
+     * @param {Number} user_telegram_id 
+     */
+    static async findMovieListByUserTelegramIdAndScoreNotNull(user_telegram_id) {
+        return UserMovie.saved
+        .filter(
+            user_movie => user_movie.score != null
+                       && user_movie.user_id.telegram_id == user_telegram_id
+        )
+        .map(
+            user_movie => {
+                let movie = user_movie.movie_id
+                movie.score = user_movie.score
+                return movie
+            }
+        )
     }
 
 }
