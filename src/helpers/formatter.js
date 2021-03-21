@@ -18,7 +18,7 @@ class Formatter {
         score = String(score)
         var n = str.toLowerCase().lastIndexOf(score)
         str = str.slice(0, n)
-        return str
+        return _.trim(str)
     }
 
     static getNumberOfString(str) {

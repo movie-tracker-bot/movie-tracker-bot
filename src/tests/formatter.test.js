@@ -39,3 +39,44 @@ describe('test Title Case', function () {
     })
 
 })
+
+describe('Test Remove Accents And Lower Case Funciontion', function () {
+    it('Test with valid string', async function () {
+        const data = Formatter.removeAccentsAndLowerCase('A última música')
+        expect(data).toEqual('a ultima musica')
+    })
+    it('Test with a invalid string', async function () {
+        const data = Formatter.removeAccentsAndLowerCase(null)
+        expect(data).toEqual('')
+    })
+    it('Test with a Number', async function () {
+        const data = Formatter.removeAccentsAndLowerCase(Number(33))
+        expect(data).toEqual('33')
+    })
+
+})
+
+
+describe('Test Remove Score', function () {
+    it('Test with valid string', async function () {
+        const data = Formatter.removeScore('A última música 33')
+        expect(data).toEqual('A última música')
+    })
+    it('Test with a invalid string', async function () {
+        const data = Formatter.removeAccentsAndLowerCase(null)
+        expect(data).toEqual('')
+    })
+
+})
+
+describe('Test Get Number Of String', function () {
+    it('Test with valid string', async function () {
+        const data = Formatter.getNumberOfString('A musica 33')
+        expect(data).toEqual(Number(33))
+    })
+    it('Test with a invalid string', async function () {
+        const data = Formatter.getNumberOfString('48')
+        expect(data).toEqual(Number(48))
+    })
+
+})
