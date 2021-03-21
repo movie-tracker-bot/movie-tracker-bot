@@ -188,6 +188,9 @@ class BotHandler {
     }
 
     static async askMovieFromDatabaseConfirmation(ctx, movie, question = 'Is this the correct movie?') {
+        if (!movie) {
+            return
+        }
         await ctx.reply(Formatter.toTitleCase(movie.title))
         if (movie.poster_url) {
             await ctx.replyWithPhoto(movie.poster_url)
@@ -202,9 +205,9 @@ class BotHandler {
 
         console.log(`Got confirmation message: ${message}`)
 
-        const positive_answer = /^(yes+|yep|yeah|y)$/i
-        const negative_answer = /^(no+|nope|nah|n)$/i
-        const cancel_answer = /^(cancel|nvm|forget it)$/i
+        const positive_answer = /^(yes+|yep|yeah|y|sim|s)$/i
+        const negative_answer = /^(no+|nope|nah|n|não)$/i
+        const cancel_answer = /^(cancel|nvm|forget it|cancelar)$/i
 
         const state = this.state[user]
 
@@ -259,6 +262,7 @@ class BotHandler {
                 await ctx.reply('Sorry I didn\'t found a movie for you :()')
                 return
             }
+
             await ctx.reply(Formatter.toTitleCase(movie.title))
 
             if (movie.poster_url) {
@@ -266,8 +270,7 @@ class BotHandler {
             }
 
             await ctx.reply('Have a nice movie :)')
-        }
-        else {
+        } else {
             await ctx.reply('You don\'t have any unwatched movies in you list :(')
             await ctx.reply('Try adding some with the \'add\' command.')
         }
@@ -304,7 +307,7 @@ class BotHandler {
             return
         }
 
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `Do you want to set ${Formatter.toTitleCase(movieName)}\'s score to ${score}?`)
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `Do you want to set ${Formatter.toTitleCase(movieName)}'s score to ${score}?`)
         this.state[id] = {}
         this.state[id].next = this.confirm.bind(
             this,
@@ -315,11 +318,11 @@ class BotHandler {
                 return true
             },
             async () => {
-                await ctx.reply(`Ok! This score won\'t be set to ${Formatter.toTitleCase(movieName)}`)
+                await ctx.reply(`Ok! This score won't be set to ${Formatter.toTitleCase(movieName)}`)
                 return true
             },
             async () => {
-                await ctx.reply(`Cancelling...`)
+                await ctx.reply('Cancelling...')
                 return true
             }
         )
@@ -350,7 +353,7 @@ class BotHandler {
             await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
             return
         }
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, "Are you sure you want to remove this movie from your list? This action can't be undone")
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, 'Are you sure you want to remove this movie from your list? This action can\'t be undone')
 
         this.state[user] = {}
         this.state[user].next = this.confirm.bind(
@@ -403,12 +406,12 @@ class BotHandler {
             scored: () => movieListService.getList(null, true)
         }
 
-        if (!getters.hasOwnProperty(type)) { // Invalid type.
+        if (!Object.prototype.hasOwnProperty.call(getters, type)) { // Invalid type.
             await ctx.reply('Sorry, I don\'t understand.')
             return
         }
 
-        let movies = await getters[type]();
+        let movies = await getters[type]()
 
         if (genre) {
             movies = movies.filter(

@@ -1,21 +1,21 @@
-const movies = require('./movies.json');
+const movies = require('./movies.json')
 
 
 class ImdbService {
     static async getMovieByTitle(title) {
-        return movies;
+        return movies
     }
 
     static async getMovieDetails(id) {
         // TODO.
-        return null;
+        return null
     }
 
     static async getMovieGenres(id) {
-        return [ "Adventure", "Drama", "Sci-Fi" ]
+        return ['Adventure', 'Drama', 'Sci-Fi']
     }
 }
 
 
-module.exports = ImdbService;
+module.exports = ImdbService
 

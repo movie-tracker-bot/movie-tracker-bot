@@ -14,10 +14,10 @@ class Formatter {
     }
 
     static removeScore(str) {
-        let score  = Formatter.getNumberOfString(str)
+        let score = Formatter.getNumberOfString(str)
         score = String(score)
-        var n = str.toLowerCase().lastIndexOf(score);
-        str = str.slice(0, n);
+        var n = str.toLowerCase().lastIndexOf(score)
+        str = str.slice(0, n)
         return str
     }
 
@@ -26,7 +26,7 @@ class Formatter {
             return null
         }
 
-        var n = Formatter.lastRegexIndexOf(str,/[0-9\.]+/g);
+        var n = Formatter.lastRegexIndexOf(str, /[0-9.]+/g)
         if (n < 0) {
             return null
         }
@@ -34,11 +34,11 @@ class Formatter {
         return Number(str)
     }
 
-    static lastRegexIndexOf(str, re){
+    static lastRegexIndexOf(str, re) {
         var lastIndex = -2
-        for (let i = 0; i< str.length; i++){
+        for (let i = 0; i < str.length; i++) {
             let thisIndex = Formatter.regexIndexOf(str, re, i)
-            if (thisIndex-1 > lastIndex){
+            if (thisIndex - 1 > lastIndex) {
                 lastIndex = thisIndex
             }
         }
@@ -46,7 +46,7 @@ class Formatter {
     }
     static regexIndexOf(str, re, i) {
         var indexInSuffix = str.slice(i).search(re)
-        if (indexInSuffix < 0){
+        if (indexInSuffix < 0) {
             return -1
         }
         return indexInSuffix + i
@@ -68,7 +68,7 @@ class Formatter {
         return regex.exec(idString)[1]
     }
 
-    static toTitleCase(string){
+    static toTitleCase(string) {
         return _.startCase(_.camelCase(string))
     }
 }

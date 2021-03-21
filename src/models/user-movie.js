@@ -29,16 +29,16 @@ class UserMovie {
                 this.id = existingUserMovie.id
                 this.user_id = existingUserMovie.user_id
                 this.movie_id = existingUserMovie.movie_id
-                if (this.watched && !existingUserMovie.watched){
+                if (this.watched && !existingUserMovie.watched) {
                     await this.updateWatched()
                 }
-                else{
+                else {
                     this.watched = existingUserMovie.watched
                 }
-                if (this.score && this.score != existingUserMovie.score){
+                if (this.score && this.score != existingUserMovie.score) {
                     this.updateScore()
                 }
-                else{
+                else {
                     this.score = existingUserMovie.score
                 }
             }
@@ -63,11 +63,10 @@ class UserMovie {
         }
     }
 
-    async delete(){
+    async delete() {
         try {
             const db = await Database.getDatabase()
-            await db.run(`DELETE FROM user_movie WHERE id = ?`, 
-                        [this.id])
+            await db.run('DELETE FROM user_movie WHERE id = ?', [this.id])
             db.close()
         } catch (err) {
             console.log(err)
@@ -198,7 +197,7 @@ class UserMovie {
             console.log('An error occurred while getting user_movie list')
         }
     }
-    
+
     /**
      * 
      * @param {Number} user_telegram_id 
@@ -222,26 +221,26 @@ class UserMovie {
         }
     }
 
-    async updateScore(){
+    async updateScore() {
         try {
             const db = await Database.getDatabase()
-            await db.run(`UPDATE user_movie SET score = ? WHERE id = ?;`, [this.score, this.id]) 
+            await db.run('UPDATE user_movie SET score = ? WHERE id = ?;', [this.score, this.id])
             db.close()
         } catch (err) {
             console.log(err)
-            console.log("An error occurred while trying to update movie score")
+            console.log('An error occurred while trying to update movie score')
         }
-        
+
     }
 
-    async updateWatched(){
+    async updateWatched() {
         try {
             const db = await Database.getDatabase()
-            await db.run(`UPDATE user_movie SET watched = ? WHERE id = ?;`, [this.watched, this.id]) 
+            await db.run('UPDATE user_movie SET watched = ? WHERE id = ?;', [this.watched, this.id])
             db.close()
         } catch (err) {
             console.log(err)
-            console.log("An error occurred while trying to update movie watched")
+            console.log('An error occurred while trying to update movie watched')
         }
     }
 }
