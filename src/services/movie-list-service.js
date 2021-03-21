@@ -10,23 +10,21 @@ class MovieListService {
     }
     /**
      *
-     * @param {number} maxLength - lenght of list. If null, will get full list
      * @param {boolean} watched - if list is of watched or unwatched movies, if null will get both
+     * @param {boolean} watched - if list is of scored movies, if null will get all. If true, will get only
+     *                              scored.
      */
-    async getList(watched = null) {
-        if (watched === null) {
+    async getList(watched = null, scored = null) {
+        if (watched === null & scored === null) {
             return await UserMovie.findMovieListByUserTelegramId(this.user.telegram_id)
         }
-        else {
+        else if (watched != null){
             return await UserMovie.findMovieListByUserTelegramIdAndWatched(this.user.telegram_id, watched)
         }
-    }
-
-    /**
-     * @param {Number} maxLength - lenght of list. If null, will get full list
-     */
-    async getListByScore(maxLength = 10) {
-
+        else{
+            const movie_list = await UserMovie.findMovieListByUserTelegramIdAndScoreNotNull(this.user.telegram_id)
+            return movie_list
+        }
     }
 
     static sortByScore(movies) {

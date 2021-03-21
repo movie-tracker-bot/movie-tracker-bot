@@ -450,7 +450,8 @@ class BotHandler {
         let getters = {
             all:       () => movieListService.getList(),
             watched:   () => movieListService.getList(true),
-            unwatched: () => movieListService.getList(false)
+            unwatched: () => movieListService.getList(false),
+            scored:    () => movieListService.getList(null, true)
         }
 
         if (!getters.hasOwnProperty(type)) { // Invalid type.
@@ -475,11 +476,19 @@ class BotHandler {
 
         let response = ''
         const watched_emojis = [ '🎞', '✔' ]
-
-        for (let movie of movies) {
-            const watched = movie.watched ? 1 : 0
-            response += `${watched_emojis[watched]} ${movie.title}\n`
+        if (type == 'scored'){
+            for (let movie of movies) {
+                const watched = movie.watched ? 1 : 0
+                response += `${watched_emojis[watched]} ${movie.title} - Your score: ${movie.score}\n`
+            }
         }
+        else{
+            for (let movie of movies) {
+                const watched = movie.watched ? 1 : 0
+                response += `${watched_emojis[watched]} ${movie.title}\n`
+            }
+        }
+        
 
         await ctx.reply(response)
     }

@@ -8,7 +8,7 @@ class Menssages {
         /remove + movie name to remove  a movie in your list.
         /score + movie name + score to rate a movie
         /watched + movie name to set a movie as watched
-        /list + (all|watched|unwatched) + genre to list your movies
+        /list + (all|watched|unwatched|scored) + genre to list your movies
         /rand to get a random recommendation
         /myRank to see your rank `
     }

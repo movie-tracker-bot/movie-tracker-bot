@@ -16,6 +16,7 @@ class Movie {
         this.poster_url = poster_url
         this.genreList = null
     }
+    
     async createIfDoesntExist() {
         try {
             let existing_movie = await Movie.findByImdbId(this.imdb_id)
@@ -54,6 +55,12 @@ class Movie {
             }
         }
     }
+
+    async fillGenreList() {
+        this.genreList = new MovieGenreList(this.id)
+        await this.genreList.getGenres()
+    }
+
     /**
      * @param {string} imdb_id
      */
@@ -94,7 +101,11 @@ class Movie {
         }
     }
 
-
+    /**
+     * 
+     * @param {string} title 
+     * @returns Movie with that title if exists
+     */
     static async findByTitle(title) {
         try {
             const db = await Database.getDatabase()
@@ -111,12 +122,6 @@ class Movie {
             console.log('Error on retrieving movie')
             return null
         }
-    }
-
-
-    async fillGenreList() {
-        this.genreList = new MovieGenreList(this.id)
-        await this.genreList.getGenres()
     }
 }
 

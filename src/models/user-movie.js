@@ -151,7 +151,6 @@ class UserMovie {
     }
 
     /**
-    /**
      * 
      * @param {Number} user_telegram_id 
      */
@@ -199,6 +198,30 @@ class UserMovie {
             console.log('An error occurred while getting user_movie list')
         }
     }
+    
+    /**
+     * 
+     * @param {Number} user_telegram_id 
+     */
+    static async findMovieListByUserTelegramIdAndScoreNotNull(user_telegram_id) {
+        try {
+            const db = await Database.getDatabase()
+            let results = await db.all('SELECT * FROM user_movie WHERE user_id = ? AND score IS NOT NULL', [user_telegram_id])
+            var movieList = []
+            if (Array.isArray(results)) {
+                for (let i = 0; i < results.length; i++) {
+                    let movie = await Movie.findById(results[i].movie_id)
+                    movie.score = results[i].score
+                    movieList.push(movie)
+                }
+            }
+            return movieList
+        } catch (err) {
+            console.log(err)
+            console.log('An error occurred while getting user_movie list')
+        }
+    }
+
     async updateScore(){
         try {
             const db = await Database.getDatabase()
