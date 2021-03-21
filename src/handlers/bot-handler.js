@@ -125,7 +125,7 @@ class BotHandler {
                     poster_url = movie.image.url
                 }
 
-                const movieDAO = new Movie(null, movie.id, movie.title, movie.year, poster_url)
+                const movieDAO = new Movie(null, movie.id, movie.title.toLowerCase(), movie.year, poster_url)
                 await movieDAO.createIfDoesntExist()
 
                 const userMovieDAO = new UserMovie(null, ctx.from.id, movieDAO.id)
@@ -138,7 +138,7 @@ class BotHandler {
                     await movieGenreList.add(new Genre(null, genre))
                 }
 
-                await ctx.reply(`Got it! ${movie.title} added to your list!`)
+                await ctx.reply(`Got it! ${Formatter.toTitleCase(movie.title)} added to your list!`)
 
                 return true
             },
@@ -167,7 +167,7 @@ class BotHandler {
     static async askMovieConfirmation(ctx, state) {
         const movie = state.movie_list[state.movie_ix]
 
-        await ctx.reply(movie.title)
+        await ctx.reply(Formatter.toTitleCase(movie.title))
 
         if (movie.image) {
             await ctx.replyWithPhoto(movie.image.url)
@@ -177,7 +177,7 @@ class BotHandler {
     }
 
     static async askMovieFromDatabaseConfirmation(ctx, movie, question = 'Is this the correct movie?'){
-        await ctx.reply(movie.title)
+        await ctx.reply(Formatter.toTitleCase(movie.title))
         if (movie.poster_url){
             await ctx.replyWithPhoto(movie.poster_url)
         }
@@ -244,7 +244,7 @@ class BotHandler {
         if (userMovie) {
             const movie = userMovie.movie_id
 
-            await ctx.reply(movie.title)
+            await ctx.reply(Formatter.toTitleCase(movie.title))
 
             if (movie.poster_url) {
                 await ctx.replyWithPhoto(movie.poster_url)
@@ -266,7 +266,7 @@ class BotHandler {
             return
         }
         var movieName =  Formatter.removeScore(ctx.match[1])
-        movieName = Formatter.toTitleCase(movieName)
+        movieName = movieName.toLowerCase()
         const score = Formatter.getNumberOfString(ctx.match[1])
 
         if (!movieName || !score) {
@@ -279,74 +279,28 @@ class BotHandler {
 
         const movie = await Movie.findByTitle(movieName)
         if (!movie) {
-            const movieName = Formatter.removeAccentsAndLowerCase(ctx.match[1])
-            let movie_list = await ImdbService.getMovieByTitle(movieName)
-            var poster_url = null
-            if (movie_list[0].image){
-                poster_url = movie_list[0].image.url
-            }
-            const movie = new Movie(null,movie_list[0].id,movie_list[0].title,movie_list[0].year,poster_url)
-            await movie.createIfDoesntExist()
-            await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie,`The movie isn't on your list\nDo you want to add it and set it's score to ${score}?`)
-            var state = this.state[id] = {userId: id,
-                             movieName: movieName,
-                             score: score}
-            this.state[id].next = this.confirm.bind(
-                this,
-                async (ctx, state)=>{
-                    const userMovieDAO = new UserMovie(null, id, movie.id, true, score)
-                    userMovieDAO.createIfDoesntExist()
-                    await ctx.reply(`Saved score ${score} for ${movie.title}`)
-                    return true
-                },
-                async (ctx) =>{
-                    await ctx.reply(`Ok! This score won\'t be set to ${movie.title}, because it ain\'t on your list\nIf you want to score a movie other than the one suggested add it to your list first, using the /add command`)
-                    return true
-                },
-                async (ctx) =>{
-                    await ctx.reply(`Cancelling...\n
-                    If you want to score a movie other than the one suggested, add it to your list first, using the /add command`)
-                    return true
-                })
+            await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
             return
         }
 
         const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(id,movie.id)
         if (!userMovie){
-            await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `This movie isn\'t on your list\nDo you want to add it and set it\'s score to ${score}?`)
-            this.state[id] = {}
-            this.state[id].next = this.confirm.bind(
-                this,
-                async (ctx) => {
-                    const userMovieDAO = new UserMovie(null, id, movie.id, true, score)
-                    userMovieDAO.createIfDoesntExist()
-                    await ctx.reply(`Saved score ${score} for ${movie.title}`)
-                    return true
-                },
-                async (ctx) =>{
-                    await ctx.reply(`Ok! This score won\'t be set to ${movieName}, because it ain\'t on your list`)
-                    return true
-                },
-                async (ctx) =>{
-                    await ctx.reply(`Cancelling...`)
-                    return true
-                }
-            )
+            await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
             return
         }
 
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `Do you want to set ${movieName}\'s score to ${score}?`)
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `Do you want to set ${Formatter.toTitleCase(movieName)}\'s score to ${score}?`)
         this.state[id] = {}
         this.state[id].next = this.confirm.bind(
             this,
             async () => {
                 const userMovieDAO = new UserMovie(null, id, movie.id, true, score)
                 userMovieDAO.createIfDoesntExist()
-                await ctx.reply(`Saved score ${score} for ${movie.title}`)
+                await ctx.reply(`Saved score ${score} for ${Formatter.toTitleCase(movie.title)}`)
                 return true
             },
             async () =>{
-                await ctx.reply(`Ok! This score won\'t be set to ${movieName}`)
+                await ctx.reply(`Ok! This score won\'t be set to ${Formatter.toTitleCase(movieName)}`)
                 return true
             },
             async () =>{
@@ -357,27 +311,6 @@ class BotHandler {
         return
     }
 
-    async scoreADatabaseMovie(ctx, state){
-        const movieName = state.movie.title
-        const movie = state.movie
-        const score = state.score
-        const user = state.userId
-
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `Is this the movie you want to set the score to ${score}?`)
-        this.state[user].next = this.confirm.bind(
-            this,
-            async() => {
-                const userMovieDAO = new UserMovie(null, user, movie.id, true, score)
-                userMovieDAO.createIfDoesntExist()
-
-                await ctx.reply(`Save score ${score} for ${movie.title}`)
-            },
-            async () => {
-                await ctx.reply(`Ok! ${movie.title} score wasn`)
-            }
-        )
-    }
-
     async removeMovie(ctx, next) {
         const user = ctx.from.id
 
@@ -386,19 +319,20 @@ class BotHandler {
             return
         }
 
-        const movieName = Formatter.toTitleCase(ctx.match[1])
-        if (!movieName || movieName.length <= 0) {
+        if (!ctx.match[1] || ctx.match[1].length <= 0) {
             await ctx.reply('To remove a movie, you must inform the name')
             return
         }
+        const movieName = ctx.match[1].toLowerCase()
+
         const movie = await Movie.findByTitle(movieName)
         if (!movie) {
-            await ctx.reply(`The movie ${movieName} isn't on your list`)
+            await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
             return
         }
         const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.id)
         if (!userMovie){
-            await ctx.reply(`The movie ${movieName} isn't on your list`)
+            await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
             return
         }
         await BotHandler.askMovieFromDatabaseConfirmation(ctx,movie, "Are you sure you want to remove this movie from your list? This action can't be undone")
@@ -408,11 +342,11 @@ class BotHandler {
             this,
             async (ctx) => {
                 await userMovie.delete()
-                await ctx.reply(`The movie ${movieName} was removed from your list!`)
+                await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} was removed from your list!`)
                 return true
             },
             async (ctx) =>{
-                await ctx.reply(`Ok! ${movieName} will remain on your list`)
+                await ctx.reply(`Ok! ${Formatter.toTitleCase(movieName)} will remain on your list`)
                 return true
             },
             async (ctx) =>{
@@ -479,13 +413,13 @@ class BotHandler {
         if (type == 'scored'){
             for (let movie of movies) {
                 const watched = movie.watched ? 1 : 0
-                response += `${watched_emojis[watched]} ${movie.title} - Your score: ${movie.score}\n`
+                response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)} - Your score: ${movie.score}\n`
             }
         }
         else{
             for (let movie of movies) {
                 const watched = movie.watched ? 1 : 0
-                response += `${watched_emojis[watched]} ${movie.title}\n`
+                response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)}\n`
             }
         }
         
@@ -522,19 +456,20 @@ class BotHandler {
             return
         }
 
-        const movieName = Formatter.toTitleCase(ctx.match[1])
-        if (!movieName || movieName.length <= 0) {
+        if (!ctx.match[1] || ctx.match[1].length <= 0) {
             await ctx.reply('To set a movie as watched, you must inform it\'s name')
             return
         }
+        const movieName = ctx.match[1].toLowerCase()
+
         const movie = await Movie.findByTitle(movieName)
         if (!movie) {
-            await ctx.reply(`The movie ${movieName} isn't on your list`)
+            await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
             return
         }
         const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(userId,movie.id)
         if (!userMovie){
-            await ctx.reply(`The movie ${movieName} isn't on your list`)
+            await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
             return
         }
 
@@ -545,11 +480,11 @@ class BotHandler {
             async (ctx) => {
                 userMovie.watched = true
                 await userMovie.updateWatched()
-                await ctx.reply(`The movie ${movieName} is now set as watched!`)
+                await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} is now set as watched!`)
                 return true
             },
             async (ctx) =>{
-                await ctx.reply(`Ok! ${movieName} will remain unwatched`)
+                await ctx.reply(`Ok! ${Formatter.toTitleCase(movieName)} will remain unwatched`)
                 return true
             },
             async (ctx) =>{

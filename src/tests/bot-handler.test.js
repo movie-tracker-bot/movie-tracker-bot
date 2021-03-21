@@ -145,14 +145,14 @@ test(
             'Interstelar',
             'Interstellar',
             'Interstellar',
-            'Interstelar 2: Operation Terra 2040',
+            'Interstelar 2 Operation Terra 2040',
             'Interstellar',
             'Interstellar Wars',
             'Interested In',
-            'Inside \'Interstellar\'',
-            'Interstelar 3: Zero X',
-            'Lolita from Interstellar Space',
-            'Transformers: Interstellar',
+            'Inside Interstellar',
+            'Interstelar 3 Zero X',
+            'Lolita From Interstellar Space',
+            'Transformers Interstellar',
             'Not Interested',
             'Interstellar',
             'Interstellar',
@@ -229,7 +229,7 @@ test(
         expect(replies.markdown).toEqual([])
         expect(replies.photos.length).toEqual(1)
         expect(replies.text).toEqual(
-            expect.arrayContaining(['random movie'])
+            expect.arrayContaining(['Random Movie'])
         )
     }
 )
@@ -267,7 +267,7 @@ test(
         expect(replies.markdown).toEqual([])
         expect(replies.photos.length).toEqual(1)
         expect(replies.text).toEqual(
-            expect.arrayContaining(['random movie 2'])
+            expect.arrayContaining(['Random Movie 2'])
         )
     }
 )
@@ -334,7 +334,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 random movie\n✔ random movie 2\n'
+                '🎞 Random Movie\n✔ Random Movie 2\n'
             ]
         )
 
@@ -344,7 +344,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '✔ random movie 2\n'
+                '✔ Random Movie 2\n'
             ]
         )
 
@@ -354,7 +354,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 random movie\n'
+                '🎞 Random Movie\n'
             ]
         )
     }
@@ -395,7 +395,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 random movie\n✔ random movie 2\n'
+                '🎞 Random Movie\n✔ Random Movie 2\n'
             ]
         )
 
@@ -405,7 +405,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '✔ random movie 2\n'
+                '✔ Random Movie 2\n'
             ]
         )
 
@@ -415,7 +415,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 random movie\n'
+                '🎞 Random Movie\n'
             ]
         )
     }
@@ -453,7 +453,7 @@ test('test list scored', async() =>{
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 random movie\n✔ random movie 2\n'
+                '🎞 Random Movie\n✔ Random Movie 2\n'
             ]
         )
 
@@ -463,7 +463,7 @@ test('test list scored', async() =>{
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 random movie - Your score: 5\n'
+                '🎞 Random Movie - Your score: 5\n'
             ]
         )
 
@@ -479,7 +479,7 @@ test('test list scored', async() =>{
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 random movie - Your score: 5\n'
+                '🎞 Random Movie - Your score: 5\n'
             ]
         )
     }

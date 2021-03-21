@@ -17,7 +17,7 @@ class Menssages {
         let message = 'My Rank:\n'
         let limit = Math.min(movies.length, 3)
         for (let i = 0; i < limit; i++) {
-            message += `${Formatter.getMedals(i + 1)} ${movies[i].title} - ${movies[i].score}\n`
+            message += `${Formatter.getMedals(i + 1)} ${Formatter.toTitleCase(movies[i].title)} - ${movies[i].score}\n`
         }
         return message
     }
