@@ -94,7 +94,7 @@ class BotHandler {
     async text(ctx) {
         console.log(`text handler: ${ctx.message.text}`)
         const user = ctx.from.id
-        if (this.state[user]) {
+        if (this.state[user] && this.state[user].next) {
             console.log('Dispatching to state handler...')
             await this.state[user].next(ctx)
         }
@@ -289,7 +289,7 @@ class BotHandler {
                     this.state[userId].movie_ix = 0
                     this.state[userId].movie_list = movieList
                     const state = this.state[userId]
-                    BotHandler.askMovieConfirmation(ctx, state)
+                    await BotHandler.askMovieConfirmation(ctx, state)
                     state.next = this.confirm.bind(
                         this,
             
@@ -309,7 +309,7 @@ class BotHandler {
                                 return true
                             }
                             else {
-                                BotHandler.askMovieConfirmation(ctx, state)
+                                await BotHandler.askMovieConfirmation(ctx, state)
                                 return false
                             }
                         },
@@ -326,7 +326,6 @@ class BotHandler {
             else{
                 var movieList = await movieListService.findMoviesByTitleAndYear(this.state[userId].movieName, this.state[userId].movieYear)
             }
-            
             if (!movieList.length) {
                 await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
                 delete this.state[userId]
@@ -340,7 +339,7 @@ class BotHandler {
             }
         }catch(err){
             console.log('An error occurred while geting movie from user')
-            console.log(err)
+            throw err
         }
     }
 
@@ -382,17 +381,17 @@ class BotHandler {
         this.state[id] = {}
         this.state[id].next = this.confirm.bind(
             this,
-            async () => {
+            async (ctx) => {
                 const userMovieDAO = new UserMovie(null, id, movie.id, true, score)
                 userMovieDAO.createIfDoesntExist()
                 await ctx.reply(`Saved score ${score} for ${Formatter.toTitleCase(movie.title)}`)
                 return true
             },
-            async () => {
+            async (ctx) => {
                 await ctx.reply(`Ok! This score won't be set to ${Formatter.toTitleCase(movie.title)}`)
                 return true
             },
-            async () => {
+            async (ctx) => {
                 await ctx.reply('Cancelling...')
                 return true
             }

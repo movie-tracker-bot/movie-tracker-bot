@@ -12,6 +12,22 @@ jest.mock('../models/genre')
 jest.mock('../models/movie-genre-list')
 jest.mock('../services/imdb-service')
 
+class ContextMock{
+    constructor(id, match, text = null){
+        this.from = {id: id}
+        this.match = match
+        this.message = {text: text}
+        this.replies = []
+        this.photos = []
+    }
+    async reply(string){
+        this.replies.push(string)
+    }
+    async replyWithPhoto(string){
+        this.photos.push(string)
+    }
+}
+
 const telegraf = new Telegraf('token')
 const bot = new BotHandler(telegraf)
 
@@ -566,7 +582,7 @@ test(
     }
 )
 
-test('score unique movie',
+test('score movie without score',
     async () => {
 
         let user = new User(0, 'random user')
@@ -577,15 +593,202 @@ test('score unique movie',
 
         let userMovie = new UserMovie(1, user, movie, false, null)
         userMovie.save()
-        replies = await telegraf.sendMessage('/score rando movie 5')
+        replies = await telegraf.sendMessage('/score random movie')
 
         expect(replies.markdown).toEqual([])
         expect(replies.photos.length).toEqual(0)
-        expect(replies.text).toEqual('Do you want to set this movie\'s score to 5?')
-
-        replies = await telegraf.sendMessage('yes')
-        expect(replies.markdown).toEqual([])
-        expect(replies.photos.length).toEqual(0)
-        expect(replies.text).toEqual(['Saved score 5 for Random Movie'])
-
+        expect(replies.text).toEqual(['To add score please send movie name + score'])
     })
+
+test('score movie with score greater than 10',
+    async () => {
+
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        replies = await telegraf.sendMessage('/score random movie 15')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text).toEqual(['The score need to be between 0 and 10'])
+    })
+
+test('test get movie with movie not on list',
+    async () => {
+        
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        let ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movieName: 'rando movie',
+            score: 5
+        }
+        await bot.getMovie(ctx,bot.setScoreForMovie.bind(bot))
+        expect(ctx.replies).toEqual(['This movie isn\'t on your list, try adding it with the /add command'])
+        
+    })
+
+test('test get movie with movie on list',
+    async () => {
+        
+        let user = new User(12, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        let ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movieName: 'random movie',
+            score: 5
+        }
+        await bot.getMovie(ctx,(ctx,state)=>{return})
+        expect(ctx.replies).toEqual([])
+        expect(bot.state[user.telegram_id].movie.title).toEqual(movie.title)
+        expect(bot.state[user.telegram_id].movie.id).toEqual(movie.id)
+
+        
+    })
+
+    test('test get movie with multiple matches movies on list',
+    async () => {
+        
+        let user = new User(12, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        let movie2 = new Movie(2, 'random_id', 'random movie', 1338, 'random movie image2.jpg')
+        movie2.save()
+        let userMovie2 = new UserMovie(1, user, movie2, false, null)
+        userMovie2.save()
+        let ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movieName: 'random movie',
+            score: 5
+        }
+        await bot.getMovie(ctx,(ctx,state)=>{return})
+        expect(ctx.replies).toEqual(['Random Movie',"Is this the correct movie?"])
+        expect(ctx.photos).toEqual(['random movie image.jpg'])
+
+        ctx = new ContextMock(user.telegram_id,[], 'no')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies).toEqual(['Random Movie',"Is this the correct movie?"])
+        expect(ctx.photos).toEqual(['random movie image2.jpg'])
+        ctx = new ContextMock(user.telegram_id,[], 'no')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies).toEqual(['Well, I ain\'t got any other suggestions...'])
+
+        ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movieName: 'random movie',
+            score: 5
+        }
+        await bot.getMovie(ctx,(ctx,state)=>{return})
+        expect(ctx.replies).toEqual(['Random Movie',"Is this the correct movie?"])
+        expect(ctx.photos).toEqual(['random movie image.jpg'])
+        ctx = new ContextMock(user.telegram_id,[],'yes')
+        await bot.state[user.telegram_id].next(ctx)
+
+        expect(ctx.replies).toEqual([])
+        bot.state[user.telegram_id] = {
+            movieName: 'random movie',
+            score: 5
+        }
+        await bot.getMovie(ctx,(ctx,state)=>{return})
+        expect(ctx.replies).toEqual(['Random Movie',"Is this the correct movie?"])
+        expect(ctx.photos).toEqual(['random movie image.jpg'])
+        ctx = new ContextMock(user.telegram_id,[],'nvm')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies).toEqual(['Cancelling...'])
+    })
+
+    test('test get movie with year',
+    async () => {
+        
+        let user = new User(12, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        let movie2 = new Movie(2, 'random_id', 'random movie', 1338, 'random movie image2.jpg')
+        movie2.save()
+        let userMovie2 = new UserMovie(1, user, movie2, false, null)
+        userMovie2.save()
+        let ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movieName: 'random movie',
+            movieYear: 1337,
+            score: 5
+        }
+        await bot.getMovie(ctx,(ctx,state)=>{return})
+        expect(ctx.replies).toEqual([])
+        expect(bot.state[user.telegram_id].movie.title).toEqual(movie.title)
+        expect(bot.state[user.telegram_id].movie.id).toEqual(movie.id)
+    })
+
+    test('test set score from movie',
+    async () => {
+        
+        let user = new User(12, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        let ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movie: movie,
+            score: 5
+        }
+        await bot.setScoreForMovie(ctx, bot.state[user.telegram_id])
+        expect(ctx.replies).toEqual(['Random Movie',"Do you want to set this movie\'s score to 5?"])
+        expect(ctx.photos).toEqual(['random movie image.jpg'])
+        ctx = new ContextMock(user.telegram_id,[], 'yes')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies).toEqual(['Saved score 5 for Random Movie'])
+
+        ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movie: movie,
+            score: 5
+        }
+        await bot.setScoreForMovie(ctx, bot.state[user.telegram_id])
+        expect(ctx.replies).toEqual(['Random Movie',"Do you want to set this movie\'s score to 5?"])
+        expect(ctx.photos).toEqual(['random movie image.jpg'])
+        ctx = new ContextMock(user.telegram_id,[], 'no')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies).toEqual(['Ok! This score won\'t be set to Random Movie'])
+
+        ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movie: movie,
+            score: 5
+        }
+        await bot.setScoreForMovie(ctx, bot.state[user.telegram_id])
+        expect(ctx.replies).toEqual(['Random Movie',"Do you want to set this movie\'s score to 5?"])
+        expect(ctx.photos).toEqual(['random movie image.jpg'])
+        ctx = new ContextMock(user.telegram_id,[], 'nvm')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies).toEqual(['Cancelling...'])
+    })
+    
+
