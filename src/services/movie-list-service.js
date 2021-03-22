@@ -26,6 +26,20 @@ class MovieListService {
             return movie_list
         }
     }
+    
+    async findMoviesByTitle(title){
+        var titleToSearch = title.toLowerCase()
+        var movieList = await UserMovie.findMovieListByUserTelegramId(this.user.telegram_id)
+        return movieList.filter( movie => movie.title === titleToSearch)
+    }
+
+    async findMoviesByTitleAndYear(title, year){
+        var titleToSearch = title.toLowerCase()
+        var movieList = await UserMovie.findMovieListByUserTelegramId(this.user.telegram_id)
+        return movieList
+                .filter(movie => movie.title === titleToSearch
+                                && movie.year == year)
+    }
 
     static sortByScore(movies) {
         let ranks = []

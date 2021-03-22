@@ -94,7 +94,6 @@ class BotHandler {
     async text(ctx) {
         console.log(`text handler: ${ctx.message.text}`)
         const user = ctx.from.id
-
         if (this.state[user]) {
             console.log('Dispatching to state handler...')
             await this.state[user].next(ctx)
@@ -183,7 +182,9 @@ class BotHandler {
         if (movie.image) {
             await ctx.replyWithPhoto(movie.image.url)
         }
-
+        else if(movie.poster_url){
+            await ctx.replyWithPhoto(movie.poster_url)
+        }
         await ctx.reply('Is this the correct movie?')
     }
 
@@ -276,6 +277,73 @@ class BotHandler {
         }
     }
 
+    async getMovie(ctx, next){
+        try{
+            var userId = ctx.from.id
+            const user = await User.findByTelegramId(userId)
+            const movieListService = new MovieListService(user)
+            
+            if (!this.state[userId].movieYear){
+                var movieList = await movieListService.findMoviesByTitle(this.state[userId].movieName)
+                if (movieList.length > 1){
+                    this.state[userId].movie_ix = 0
+                    this.state[userId].movie_list = movieList
+                    const state = this.state[userId]
+                    BotHandler.askMovieConfirmation(ctx, state)
+                    state.next = this.confirm.bind(
+                        this,
+            
+                        async (ctx, state) => {
+                            var movie = state.movie_list[state.movie_ix]
+                            
+                            state.movie = movie
+                            next(ctx, state)
+                            return true
+                        },
+            
+                        async (ctx, state) => {
+                            state.movie_ix++
+            
+                            if (state.movie_list.length == state.movie_ix) {
+                                await ctx.reply('Well, I ain\'t got any other suggestions...')
+                                return true
+                            }
+                            else {
+                                BotHandler.askMovieConfirmation(ctx, state)
+                                return false
+                            }
+                        },
+            
+                        async (ctx, state) => {
+                            await ctx.reply('Cancelling...')
+                            return true
+                        }
+                    )
+                    return
+                }
+                
+            }
+            else{
+                var movieList = await movieListService.findMoviesByTitleAndYear(this.state[userId].movieName, this.state[userId].movieYear)
+            }
+            
+            if (!movieList.length) {
+                await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
+                delete this.state[userId]
+                return
+            }
+            else{
+                var state = this.state[userId]
+                state.movie = movieList[0]
+                next(ctx, state)
+                return
+            }
+        }catch(err){
+            console.log('An error occurred while geting movie from user')
+            console.log(err)
+        }
+    }
+
     async setScore(ctx, next) {
         const id = ctx.from.id
 
@@ -283,9 +351,13 @@ class BotHandler {
             await next()
             return
         }
+
         var movieName = Formatter.removeScore(ctx.match[1])
-        movieName = movieName.toLowerCase()
         const score = Formatter.getNumberOfString(ctx.match[1])
+        const movieYear = Formatter.getYear(ctx.match[1])
+        if(movieYear){
+            movieName = Formatter.removeYear(movieName)
+        }
 
         if (!movieName || !score) {
             await ctx.reply('To add score please send movie name + score')
@@ -294,20 +366,19 @@ class BotHandler {
             await ctx.reply('The score need to be between 0 and 10')
             return
         }
-
-        const movie = await Movie.findByTitle(movieName)
-        if (!movie) {
-            await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
-            return
+        this.state[id] = {
+            movieName: movieName,
+            movieYear: movieYear,
+            score: score
         }
+        this.getMovie(ctx, this.setScoreForMovie.bind(this))   
+    }
 
-        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(id, movie.id)
-        if (!userMovie) {
-            await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
-            return
-        }
-
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `Do you want to set ${Formatter.toTitleCase(movieName)}'s score to ${score}?`)
+    async setScoreForMovie(ctx, state){
+        const id = ctx.from.id
+        const movie = state.movie
+        const score = state.score
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, `Do you want to set this movie\'s score to ${score}?`)
         this.state[id] = {}
         this.state[id].next = this.confirm.bind(
             this,
@@ -318,7 +389,7 @@ class BotHandler {
                 return true
             },
             async () => {
-                await ctx.reply(`Ok! This score won't be set to ${Formatter.toTitleCase(movieName)}`)
+                await ctx.reply(`Ok! This score won't be set to ${Formatter.toTitleCase(movie.title)}`)
                 return true
             },
             async () => {
@@ -491,7 +562,7 @@ class BotHandler {
             return
         }
 
-        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, 'Do you want to set this movie as watched?')
+        BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, 'Do you want to set this movie as watched?')
         this.state[userId] = {}
         this.state[userId].next = this.confirm.bind(
             this,

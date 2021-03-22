@@ -87,3 +87,38 @@ describe('Test Get Number Of String', function () {
         expect(data).toEqual(null)
     })
 })
+
+describe('Test Remove Year', function () {
+    it('Test with valid string', async function () {
+        const data = Formatter.removeYear('halloween (1978)')
+        expect(data).toEqual('halloween')
+    })
+    it('Test with a invalid string', async function () {
+        const data = Formatter.removeAccentsAndLowerCase('halloween')
+        expect(data).toEqual('halloween')
+    })
+
+})
+
+describe('Test Get Year', function () {
+    it('Test with valid string', async function () {
+        const data = Formatter.getYear('halloween (1978)')
+        expect(data).toEqual(Number(1978))
+    })
+    it('Test with a string only numbers', async function () {
+        const data = Formatter.getYear('(1948)')
+        expect(data).toEqual(Number(1948))
+    })
+    it('Test with a string without parentesis', async function () {
+        const data = Formatter.getYear('halloween 1978')
+        expect(data).toEqual(null)
+    })
+    it('Test with a string without four digits', async function () {
+        const data = Formatter.getYear('halloween (12)')
+        expect(data).toEqual(null)
+    })
+    it('Test with a string without number', async function () {
+        const data = Formatter.getYear('A ultima musica')
+        expect(data).toEqual(null)
+    })
+})

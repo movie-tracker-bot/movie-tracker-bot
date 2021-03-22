@@ -565,3 +565,27 @@ test(
 
     }
 )
+
+test('score unique movie',
+    async () => {
+
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        replies = await telegraf.sendMessage('/score rando movie 5')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text).toEqual('Do you want to set this movie\'s score to 5?')
+
+        replies = await telegraf.sendMessage('yes')
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text).toEqual(['Saved score 5 for Random Movie'])
+
+    })

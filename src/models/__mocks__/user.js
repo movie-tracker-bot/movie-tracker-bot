@@ -11,7 +11,7 @@ class User {
     }
 
     static reset() {
-        User.saved.length = 0
+        User.saved = []
     }
 
     async save() {
@@ -27,7 +27,7 @@ class User {
      */
     static async findByTelegramId(telegram_id) {
         // TODO.
-        return null
+        return User.saved.filter(user => user.telegram_id === telegram_id)[0]
     }
 }
 

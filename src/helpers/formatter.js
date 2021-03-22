@@ -20,6 +20,14 @@ class Formatter {
         str = str.slice(0, n)
         return _.trim(str)
     }
+    
+    static removeYear(string) {
+        let year = Formatter.getYear(string)
+        year = `(${year})`
+        var n = string.toLowerCase().lastIndexOf(year)
+        string = string.slice(0, n)
+        return _.trim(string)
+    }
 
     static getNumberOfString(str) {
         if (!str || typeof str !== 'string') {
@@ -75,6 +83,15 @@ class Formatter {
         return string.split(' ')
         .map(_.capitalize)
         .join(' ');
+    }
+
+    static getYear(string) {
+        const index = string.search(/[(][0-9][0-9][0-9][0-9][)]/g)
+        if (index <0 ){
+            return null
+        }
+        let year = string.slice(index+1,index+5)
+        return Number(year)
     }
 }
 module.exports = Formatter
