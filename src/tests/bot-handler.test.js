@@ -617,6 +617,23 @@ test('score movie with score greater than 10',
         expect(replies.photos.length).toEqual(0)
         expect(replies.text).toEqual(['The score need to be between 0 and 10'])
     })
+test('score movie',
+    async () => {
+
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        replies = await telegraf.sendMessage('/score random movie 5')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(bot.state[user.telegram_id].movieName).toEqual(movie.title)
+    })
 
 test('test get movie with movie not on list',
     async () => {

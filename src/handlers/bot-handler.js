@@ -400,29 +400,35 @@ class BotHandler {
     }
 
     async removeMovie(ctx, next) {
-        const user = ctx.from.id
+        const id = ctx.from.id
 
-        if (this.state[user]) { // Previous action is still ongoing.
+        if (this.state[id]) { // Previous action is still ongoing.
             await next()
             return
-        }
+        }    
 
         if (!ctx.match[1] || ctx.match[1].length <= 0) {
             await ctx.reply('To remove a movie, you must inform the name')
             return
         }
-        const movieName = ctx.match[1].toLowerCase()
+        var movieName = ctx.match[1]
+        const movieYear = Formatter.getYear(ctx.match[1])
+        if(movieYear){
+            movieName = Formatter.removeYear(movieName)
+        }
 
-        const movie = await Movie.findByTitle(movieName)
-        if (!movie) {
-            await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
-            return
+        this.state[id] = {
+            movieName: movieName,
+            movieYear: movieYear,
         }
-        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(user, movie.id)
-        if (!userMovie) {
-            await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
-            return
-        }
+        this.getMovie(ctx, this.removeFoundMovie.bind(this))
+       
+    }
+
+    async removeFoundMovie(ctx, state){
+        const user = ctx.from.id
+        const movie = state.movie
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.id)
         await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, 'Are you sure you want to remove this movie from your list? This action can\'t be undone')
 
         this.state[user] = {}
@@ -430,11 +436,11 @@ class BotHandler {
             this,
             async (ctx) => {
                 await userMovie.delete()
-                await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} was removed from your list!`)
+                await ctx.reply(`The movie ${Formatter.toTitleCase(movie.title)} was removed from your list!`)
                 return true
             },
             async (ctx) => {
-                await ctx.reply(`Ok! ${Formatter.toTitleCase(movieName)} will remain on your list`)
+                await ctx.reply(`Ok! ${Formatter.toTitleCase(movie.title)} will remain on your list`)
                 return true
             },
             async (ctx) => {
@@ -443,7 +449,6 @@ class BotHandler {
             }
         )
     }
-
 
     async getMovies(ctx, next) {
         const id = ctx.from.id

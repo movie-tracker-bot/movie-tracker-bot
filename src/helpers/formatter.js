@@ -87,7 +87,7 @@ class Formatter {
 
     static getYear(string) {
         const index = string.search(/[(][0-9][0-9][0-9][0-9][)]/g)
-        if (index <0 ){
+        if (index < 0 ){
             return null
         }
         let year = string.slice(index+1,index+5)
