@@ -139,14 +139,14 @@ test(
             'Interstelar',
             'Interstellar',
             'Interstellar',
-            'Interstelar 2 Operation Terra 2040',
+            'Interstelar 2: Operation Terra 2040',
             'Interstellar',
             'Interstellar Wars',
             'Interested In',
-            'Inside Interstellar',
-            'Interstelar 3 Zero X',
+            'Inside \'interstellar\'',
+            'Interstelar 3: Zero X',
             'Lolita From Interstellar Space',
-            'Transformers Interstellar',
+            'Transformers: Interstellar',
             'Not Interested',
             'Interstellar',
             'Interstellar',
@@ -512,19 +512,18 @@ test(
         expect(replies.text.length).toEqual(1)
 
         let user = new User(0, 'random user')
-        user.save()
+        await user.save()
 
-        let movie = new Movie(1, 'random_id', 'Random Movie', 1337, 'random movie image.jpg')
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
         let genre = new Genre(1, 'Horror')
         movie.genreList.add(genre)
-        movie.save()
+        await movie.save()
 
         let userMovie = new UserMovie(1, user, movie, false, 5)
         await userMovie.save()
         replies = await telegraf.sendMessage('watched random movie')
 
         expect(replies.markdown).toEqual([])
-        expect(replies.photos.length).toEqual(0)
         expect(replies.text[1]).toEqual('Do you want to set this movie as watched?')
 
         replies = await telegraf.sendMessage('nah')
@@ -547,7 +546,7 @@ test(
         let user = new User(0, 'random user')
         user.save()
 
-        let movie = new Movie(1, 'random_id', 'Random Movie', 1337, 'random movie image.jpg')
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
         let genre = new Genre(1, 'Horror')
         movie.genreList.add(genre)
         movie.save()
@@ -557,7 +556,6 @@ test(
         replies = await telegraf.sendMessage('watched random movie')
 
         expect(replies.markdown).toEqual([])
-        expect(replies.photos.length).toEqual(0)
         expect(replies.text[1]).toEqual('Do you want to set this movie as watched?')
 
         replies = await telegraf.sendMessage('nvm')

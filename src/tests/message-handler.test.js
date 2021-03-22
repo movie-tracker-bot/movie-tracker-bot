@@ -19,7 +19,7 @@ describe('Test Get Rank', function () {
     it('Test with valid string', async function () {
         const movieList = require('../services/__mocks__/movies-list.json')
         const data = Menssages.rankMovieMessage(movieList)
-        expect(data.indexOf('Harry Potter And The Sorcerers Stone - 10')).not.toEqual(-1)
+        expect(data.indexOf('Harry Potter And The Sorcerer\'s Stone - 10')).not.toEqual(-1)
         expect(data.indexOf('Crepuscule - 2')).not.toEqual(-1)
     })
 })

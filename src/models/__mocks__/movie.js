@@ -59,8 +59,8 @@ class Movie {
     static async findByTitle(title) {
         return Movie.saved
         .filter(
-            movie => movie.title === title
-        )
+            movie => movie.title == title
+        )[0]
     }
 }
 

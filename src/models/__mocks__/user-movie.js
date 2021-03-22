@@ -21,7 +21,7 @@ class UserMovie {
     }
 
     static reset() {
-        UserMovie.saved.length = 0
+        UserMovie.saved = []
     }
 
     async createIfDoesntExist() {

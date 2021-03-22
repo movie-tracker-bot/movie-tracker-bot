@@ -72,7 +72,9 @@ class Formatter {
         if (typeof string !== 'string') {
             return undefined
         }
-        return _.startCase(_.camelCase(string))
+        return string.split(' ')
+        .map(_.capitalize)
+        .join(' ');
     }
 }
 module.exports = Formatter
