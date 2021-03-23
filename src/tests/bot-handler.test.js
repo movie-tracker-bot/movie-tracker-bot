@@ -43,6 +43,7 @@ beforeEach(() => {
     User.reset()
     Movie.reset()
     UserMovie.reset()
+    bot.state = {}
 })
 
 test(
@@ -617,6 +618,7 @@ test('score movie with score greater than 10',
         expect(replies.photos.length).toEqual(0)
         expect(replies.text).toEqual(['The score need to be between 0 and 10'])
     })
+
 test('score movie',
     async () => {
 
@@ -808,4 +810,17 @@ test('test get movie with movie on list',
         expect(ctx.replies).toEqual(['Cancelling...'])
     })
     
+    test('wait previous action', async() =>{
+        let user = new User(0, 'random user')
+        const next = async () =>{return}
+        user.save()
+        let result = await bot.endPreviousAction(user.telegram_id, next)
+        expect(result).toEqual(false)
+        bot.state[user.telegram_id] = {
+            next: next
+        }
+        result = await bot.endPreviousAction(user.telegram_id, next)
+        expect(result).toEqual(true)
+
+    })
 

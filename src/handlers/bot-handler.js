@@ -108,8 +108,7 @@ class BotHandler {
     async addMovie(ctx, next) {
         const user = ctx.from.id
 
-        if (this.state[user]) { // Previous action is still ongoing.
-            await next()
+        if (await this.endPreviousAction(user, next)) {
             return
         }
 
@@ -241,8 +240,7 @@ class BotHandler {
     async randMovie(ctx, next) {
         const user = ctx.from.id
 
-        if (this.state[user]) { // Previous action is still ongoing.
-            await next()
+        if (await this.endPreviousAction(user, next)) {
             return
         }
 
@@ -346,8 +344,7 @@ class BotHandler {
     async setScore(ctx, next) {
         const id = ctx.from.id
 
-        if (this.state[id]) { // Previous action is still ongoing.
-            await next()
+        if (await this.endPreviousAction(id, next)) {
             return
         }
 
@@ -402,10 +399,9 @@ class BotHandler {
     async removeMovie(ctx, next) {
         const id = ctx.from.id
 
-        if (this.state[id]) { // Previous action is still ongoing.
-            await next()
+        if (await this.endPreviousAction(id, next)){
             return
-        }    
+        }
 
         if (!ctx.match[1] || ctx.match[1].length <= 0) {
             await ctx.reply('To remove a movie, you must inform the name')
@@ -453,8 +449,7 @@ class BotHandler {
     async getMovies(ctx, next) {
         const id = ctx.from.id
 
-        if (this.state[id]) { // Previous action is still ongoing.
-            await next()
+        if (await this.endPreviousAction(id, next)) {
             return
         }
 
@@ -524,8 +519,7 @@ class BotHandler {
     async getRank(ctx, next) {
         const id = ctx.from.id
 
-        if (this.state[id]) { // Previous action is still ongoing.
-            await next()
+        if (await this.endPreviousAction(id, next)) {
             return
         }
 
@@ -544,8 +538,7 @@ class BotHandler {
     async setWatched(ctx, next) {
         const userId = ctx.from.id
 
-        if (this.state[userId]) { // Previous action is still ongoing.
-            await next()
+        if (await this.endPreviousAction(userId, next)) {
             return
         }
 
@@ -587,6 +580,17 @@ class BotHandler {
         )
 
     }
+
+    async endPreviousAction(userId, next){
+        if (this.state[userId]) { // Previous action is still ongoing.
+            await next()
+            return true
+        }
+        else{
+            return false
+        }
+    }
+
     async launch() {
         await this.telegraf.launch()
     }
