@@ -537,7 +537,6 @@ class BotHandler {
 
     async setWatched(ctx, next) {
         const userId = ctx.from.id
-
         if (await this.endPreviousAction(userId, next)) {
             return
         }
@@ -546,31 +545,37 @@ class BotHandler {
             await ctx.reply('To set a movie as watched, you must inform it\'s name')
             return
         }
-        const movieName = ctx.match[1].toLowerCase()
-
-        const movie = await Movie.findByTitle(movieName)
-        if (!movie) {
-            await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
-            return
-        }
-        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(userId, movie.id)
-        if (!userMovie) {
-            await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} isn't on your list`)
-            return
+        var movieName = ctx.match[1].toLowerCase()
+        const movieYear = Formatter.getYear(ctx.match[1])
+        if(movieYear){
+            movieName = Formatter.removeYear(movieName)
         }
 
-        BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, 'Do you want to set this movie as watched?')
+        this.state[userId] = {
+            movieName: movieName,
+            movieYear: movieYear,
+        }
+        this.getMovie(ctx, this.setFoundMovieAsWatched.bind(this))
+
+    }
+
+    async setFoundMovieAsWatched(ctx, state){
+        const userId = ctx.from.id
+        const movie = state.movie
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(userId,movie.id)
+
+        await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, 'Do you want to set this movie as watched?')
         this.state[userId] = {}
         this.state[userId].next = this.confirm.bind(
             this,
             async (ctx) => {
                 userMovie.watched = true
                 await userMovie.updateWatched()
-                await ctx.reply(`The movie ${Formatter.toTitleCase(movieName)} is now set as watched!`)
+                await ctx.reply(`The movie ${Formatter.toTitleCase(movie.title)} is now set as watched!`)
                 return true
             },
             async (ctx) => {
-                await ctx.reply(`Ok! ${Formatter.toTitleCase(movieName)} will remain unwatched`)
+                await ctx.reply(`Ok! ${Formatter.toTitleCase(movie.title)} will remain unwatched`)
                 return true
             },
             async (ctx) => {
@@ -578,7 +583,6 @@ class BotHandler {
                 return true
             }
         )
-
     }
 
     async endPreviousAction(userId, next){

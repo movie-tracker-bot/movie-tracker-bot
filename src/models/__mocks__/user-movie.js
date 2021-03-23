@@ -34,6 +34,7 @@ class UserMovie {
 
     async updateWatched() {
         //do nothing
+        return
     }
 
     async delete(){
