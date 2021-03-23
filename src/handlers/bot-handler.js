@@ -403,7 +403,7 @@ class BotHandler {
             return
         }
 
-        if (!ctx.match[1] || ctx.match[1].length <= 0) {
+        if (!ctx.match[1] || ctx.match[1].length <= 1) {
             await ctx.reply('To remove a movie, you must inform the name')
             return
         }

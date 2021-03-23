@@ -554,11 +554,6 @@ test(
 test(
     'test cancel set movie as watched',
     async () => {
-        let replies = await telegraf.sendMessage('list all')
-
-        expect(replies.markdown).toEqual([])
-        expect(replies.photos.length).toEqual(0)
-        expect(replies.text.length).toEqual(1)
 
         let user = new User(0, 'random user')
         user.save()
@@ -637,6 +632,38 @@ test('score movie',
         expect(bot.state[user.telegram_id].movieName).toEqual(movie.title)
     })
 
+test('score movie with year',
+    async () => {
+
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        replies = await telegraf.sendMessage('/score random movie (1337) 5')
+
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(bot.state[user.telegram_id].movieName).toEqual(movie.title)
+        expect(bot.state[user.telegram_id].movieYear).toEqual(movie.year)
+        })
+
+test('set score with previous action still ongoing', 
+    async()=>{
+        let user = new User(0, 'random user')
+        const next = async () =>{return}
+        bot.state[user.telegram_id] = {
+            next: next
+        }
+        let replies = await telegraf.sendMessage('score random movie 5')
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text.length).toEqual(0)
+    })
+
 test('test get movie with movie not on list',
     async () => {
         
@@ -682,7 +709,7 @@ test('test get movie with movie on list',
         
     })
 
-    test('test get movie with multiple matches movies on list',
+test('test get movie with multiple matches movies on list',
     async () => {
         
         let user = new User(12, 'random user')
@@ -737,7 +764,7 @@ test('test get movie with movie on list',
         expect(ctx.replies).toEqual(['Cancelling...'])
     })
 
-    test('test get movie with year',
+test('test get movie with year',
     async () => {
         
         let user = new User(12, 'random user')
@@ -763,7 +790,7 @@ test('test get movie with movie on list',
         expect(bot.state[user.telegram_id].movie.id).toEqual(movie.id)
     })
 
-    test('test set score from movie',
+test('test set score from movie',
     async () => {
         
         let user = new User(12, 'random user')
@@ -810,17 +837,139 @@ test('test get movie with movie on list',
         expect(ctx.replies).toEqual(['Cancelling...'])
     })
     
-    test('wait previous action', async() =>{
-        let user = new User(0, 'random user')
-        const next = async () =>{return}
-        user.save()
-        let result = await bot.endPreviousAction(user.telegram_id, next)
-        expect(result).toEqual(false)
-        bot.state[user.telegram_id] = {
-            next: next
-        }
-        result = await bot.endPreviousAction(user.telegram_id, next)
-        expect(result).toEqual(true)
+test('wait previous action', async() =>{
+    let user = new User(0, 'random user')
+    const next = async () =>{return}
+    user.save()
+    let result = await bot.endPreviousAction(user.telegram_id, next)
+    expect(result).toEqual(false)
+    bot.state[user.telegram_id] = {
+        next: next
+    }
+    result = await bot.endPreviousAction(user.telegram_id, next)
+    expect(result).toEqual(true)
 
     })
 
+test('remove movie without name', 
+    async ()=>{
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        let genre = new Genre(1, 'Horror')
+        movie.genreList.add(genre)
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, 5)
+        await userMovie.save()
+        let replies = await telegraf.sendMessage('/remove  ')
+        expect(replies.markdown).toEqual([])
+        expect(replies.text[0]).toEqual('To remove a movie, you must inform the name')
+    })
+
+test('remove movie with name',
+    async ()=>{
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        let genre = new Genre(1, 'Horror')
+        movie.genreList.add(genre)
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, 5)
+        await userMovie.save()
+        let replies = await telegraf.sendMessage('/remove random movie')
+        expect(replies.markdown).toEqual([])
+        expect(replies.text).toEqual([])
+        expect(bot.state[user.telegram_id].movieName).toEqual(movie.title)
+    })
+
+test('remove movie with name and year',
+    async ()=>{
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        let genre = new Genre(1, 'Horror')
+        movie.genreList.add(genre)
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, 5)
+        await userMovie.save()
+        let replies = await telegraf.sendMessage('/remove random movie (1337)')
+        expect(replies.markdown).toEqual([])
+        expect(replies.text).toEqual([])
+        expect(bot.state[user.telegram_id].movieName).toEqual(movie.title)
+        expect(bot.state[user.telegram_id].movieYear).toEqual(movie.year)
+    })
+
+test('remove movie with previous action still ongoing', 
+    async()=>{
+        let user = new User(0, 'random user')
+        const next = async () =>{return}
+        bot.state[user.telegram_id] = {
+            next: next
+        }
+        let replies = await telegraf.sendMessage('/remove random movie')
+        expect(replies.markdown).toEqual([])
+        expect(replies.photos.length).toEqual(0)
+        expect(replies.text.length).toEqual(0)
+    })
+
+test('remove found movie', 
+    async ()=>{
+        let user = new User(12, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        let ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movie: movie
+        }
+
+        await bot.removeFoundMovie(ctx, bot.state[user.telegram_id])
+        expect(ctx.replies).toEqual(['Random Movie',"Are you sure you want to remove this movie from your list? This action can\'t be undone"])
+        expect(ctx.photos).toEqual(['random movie image.jpg'])
+        ctx = new ContextMock(user.telegram_id,[], 'yes')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies).toEqual(['The movie Random Movie was removed from your list!'])
+    })
+
+test('cancel remove found movie', 
+    async ()=>{
+        let user = new User(12, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        let ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movie: movie
+        }
+
+        await bot.removeFoundMovie(ctx, bot.state[user.telegram_id])
+        expect(ctx.replies).toEqual(['Random Movie',"Are you sure you want to remove this movie from your list? This action can\'t be undone"])
+        expect(ctx.photos).toEqual(['random movie image.jpg'])
+        ctx = new ContextMock(user.telegram_id,[], 'no')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies).toEqual(['Ok! Random Movie will remain on your list'])
+        
+        ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movie: movie
+        }
+
+        await bot.removeFoundMovie(ctx, bot.state[user.telegram_id])
+        expect(ctx.replies).toEqual(['Random Movie',"Are you sure you want to remove this movie from your list? This action can\'t be undone"])
+        expect(ctx.photos).toEqual(['random movie image.jpg'])
+        ctx = new ContextMock(user.telegram_id,[], 'nvm')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies).toEqual(['Cancelling...'])
+    })

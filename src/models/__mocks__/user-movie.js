@@ -36,12 +36,16 @@ class UserMovie {
         //do nothing
     }
 
+    async delete(){
+        UserMovie.saved = UserMovie.saved.filter( user_movie => user_movie.id != this.id)
+    }
+
     static async findByUserTelegramIdAndMovieId(user_telegram_id, movie_id) {
         return UserMovie.saved
         .filter(
             user_movie => user_movie.user_id.telegram_id == user_telegram_id &&
                              user_movie.movie_id.id == movie_id
-        )
+        )[0]
     }
 
     static async findUnwatchedRandomByTelegramId(user_telegram_id) {
