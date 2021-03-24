@@ -48,7 +48,7 @@ class MovieListService {
                 ranks.push(movie)
             }
         }
-        return ranks.sort((a, b) => Number(a.score) > Number(b.score))
+        return ranks.sort((a, b) => Number(b.score) - Number(a.score) )
     }
 }
 
