@@ -23,7 +23,7 @@ class MovieListService {
         }
         else{
             const movie_list = await UserMovie.findMovieListByUserTelegramIdAndScoreNotNull(this.user.telegram_id)
-            return movie_list
+            return MovieListService.sortByScore(movie_list)
         }
     }
     

@@ -501,13 +501,13 @@ class BotHandler {
         if (type == 'scored') {
             for (let movie of movies) {
                 const watched = movie.watched ? 1 : 0
-                response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)} - Your score: ${movie.score}\n`
+                response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)} (${movie.year}) - Your score: ${movie.score}\n`
             }
         }
         else {
             for (let movie of movies) {
                 const watched = movie.watched ? 1 : 0
-                response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)}\n`
+                response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)} (${movie.year})\n`
             }
         }
 

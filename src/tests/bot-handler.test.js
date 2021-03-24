@@ -345,7 +345,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 Random Movie\n✔ Random Movie 2\n'
+                '🎞 Random Movie (1337)\n✔ Random Movie 2 (1338)\n'
             ]
         )
 
@@ -355,7 +355,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '✔ Random Movie 2\n'
+                '✔ Random Movie 2 (1338)\n'
             ]
         )
 
@@ -365,7 +365,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 Random Movie\n'
+                '🎞 Random Movie (1337)\n'
             ]
         )
     }
@@ -406,7 +406,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 Random Movie\n✔ Random Movie 2\n'
+                '🎞 Random Movie (1337)\n✔ Random Movie 2 (1338)\n'
             ]
         )
 
@@ -416,7 +416,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '✔ Random Movie 2\n'
+                '✔ Random Movie 2 (1338)\n'
             ]
         )
 
@@ -426,7 +426,7 @@ test(
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 Random Movie\n'
+                '🎞 Random Movie (1337)\n'
             ]
         )
     }
@@ -465,7 +465,7 @@ test('test list scored',
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 Random Movie\n✔ Random Movie 2\n'
+                '🎞 Random Movie (1337)\n✔ Random Movie 2 (1338)\n'
             ]
         )
 
@@ -475,7 +475,7 @@ test('test list scored',
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 Random Movie - Your score: 5\n'
+                '🎞 Random Movie (1337) - Your score: 5\n'
             ]
         )
 
@@ -491,7 +491,7 @@ test('test list scored',
         expect(replies.photos).toEqual([])
         expect(replies.text).toEqual(
             [
-                '🎞 Random Movie - Your score: 5\n'
+                '🎞 Random Movie (1337) - Your score: 5\n'
             ]
         )
     }
