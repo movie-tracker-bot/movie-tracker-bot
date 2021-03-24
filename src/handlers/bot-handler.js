@@ -107,19 +107,31 @@ class BotHandler {
 
     async addMovie(ctx, next) {
         const user = ctx.from.id
+        let query = ''
 
-        if (await this.endPreviousAction(user, next)) {
-            return
+        if (this.state[user]) { // Previous action is still ongoing.
+            if(!this.state[user].addUnlisted){
+                await next()
+                return
+            }
+            else{ //if this is called from other action
+                query = this.state[user].movieName
+            }
         }
-
-        const query = ctx.match[1]
+        else{
+            query = ctx.match[1]
+        }
+        
 
         console.log(`Add command: ${query}`)
 
-        const state = this.state[user] = {
-            movie_ix: 0,
-            movie_list: await ImdbService.getMovieByTitle(query),
+        if (!this.state[user]){
+            this.state[user] = {}
         }
+        const state = this.state[user]
+        state.movie_ix = 0
+        state.movie_list = await ImdbService.getMovieByTitle(query)
+    
 
         BotHandler.askMovieConfirmation(ctx, state)
 
@@ -133,7 +145,6 @@ class BotHandler {
                 if (movie.image) {
                     poster_url = movie.image.url
                 }
-
                 const movieDAO = new Movie(null, movie.id, movie.title.toLowerCase(), movie.year, poster_url)
                 await movieDAO.createIfDoesntExist()
 
@@ -148,7 +159,11 @@ class BotHandler {
                 }
 
                 await ctx.reply(`Got it! ${Formatter.toTitleCase(movie.title)} added to your list!`)
-
+                
+                if (state.addUnlisted){
+                    state.movie = movieDAO
+                    next(ctx, state)
+                }
                 return true
             },
 
@@ -325,9 +340,16 @@ class BotHandler {
                 var movieList = await movieListService.findMoviesByTitleAndYear(this.state[userId].movieName, this.state[userId].movieYear)
             }
             if (!movieList.length) {
-                await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
-                delete this.state[userId]
-                return
+                if(!this.state[userId].addUnlisted){
+                    await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
+                    delete this.state[userId]
+                    return
+                }
+                else{
+                    await ctx.reply(`This movie isn\'t on your list, I will first /add ${this.state[userId].movieName}`)
+                    this.addMovie(ctx, next)
+                    return
+                }
             }
             else{
                 var state = this.state[userId]
@@ -365,7 +387,8 @@ class BotHandler {
         this.state[id] = {
             movieName: movieName,
             movieYear: movieYear,
-            score: score
+            score: score,
+            addUnlisted: true
         }
         this.getMovie(ctx, this.setScoreForMovie.bind(this))   
     }
@@ -554,6 +577,7 @@ class BotHandler {
         this.state[userId] = {
             movieName: movieName,
             movieYear: movieYear,
+            addUnlisted: true
         }
         this.getMovie(ctx, this.setFoundMovieAsWatched.bind(this))
 
