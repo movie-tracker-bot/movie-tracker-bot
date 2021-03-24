@@ -188,6 +188,21 @@ test(
     }
 )
 
+test('test add movie with addUnlisted',
+    async()=>{
+        let user = new User(0, 'random user')
+        user.save()
+        bot.state[user.telegram_id] = {
+            movieName: 'pulp fiction',
+            addUnlisted: true
+        }
+        let ctx = new ContextMock(user.telegram_id, [])
+        await bot.addMovie(ctx, (ctx, state)=>{ctx.wasCalled = true})
+        ctx = new ContextMock(user.telegram_id,[], 'yes')
+        await bot.state[user.telegram_id].next(ctx)
+        expect(ctx.replies.length).toEqual(1)
+        expect(ctx.wasCalled).toEqual(true)
+    })
 
 test(
     'test rand endpoint pattern',
@@ -798,6 +813,27 @@ test('test get movie with movie not on list',
         }
         await bot.getMovie(ctx,bot.setScoreForMovie.bind(bot))
         expect(ctx.replies).toEqual(['This movie isn\'t on your list, try adding it with the /add command'])
+        
+    })
+
+test('test get movie with movie not on list and addUnlisted',
+    async () => {
+        
+        let user = new User(0, 'random user')
+        user.save()
+
+        let movie = new Movie(1, 'random_id', 'random movie', 1337, 'random movie image.jpg')
+        movie.save()
+
+        let userMovie = new UserMovie(1, user, movie, false, null)
+        userMovie.save()
+        let ctx = new ContextMock(user.telegram_id,[])
+        bot.state[user.telegram_id] = {
+            movieName: 'pulp fiction',
+            addUnlisted: true
+        }
+        await bot.getMovie(ctx,bot.setScoreForMovie.bind(bot))
+        expect(ctx.replies[0]).toEqual('This movie isn\'t on your list, I will first /add pulp fiction')
         
     })
 
