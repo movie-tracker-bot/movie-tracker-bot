@@ -37,16 +37,16 @@ class UserMovie {
         return
     }
 
-    async delete(){
-        UserMovie.saved = UserMovie.saved.filter( user_movie => user_movie.id != this.id)
+    async delete() {
+        UserMovie.saved = UserMovie.saved.filter(user_movie => user_movie.id != this.id)
     }
 
     static async findByUserTelegramIdAndMovieId(user_telegram_id, movie_id) {
         return UserMovie.saved
-        .filter(
-            user_movie => user_movie.user_id.telegram_id == user_telegram_id &&
-                             user_movie.movie_id.id == movie_id
-        )[0]
+            .filter(
+                user_movie => user_movie.user_id.telegram_id == user_telegram_id &&
+                    user_movie.movie_id.id == movie_id
+            )[0]
     }
 
     static async findUnwatchedRandomByTelegramId(user_telegram_id) {
@@ -69,9 +69,7 @@ class UserMovie {
      */
     static async findMovieListByUserTelegramId(user_telegram_id) {
         return UserMovie.saved
-            .filter(
-                user_movie => user_movie.user_id.telegram_id == user_telegram_id
-            )
+            .filter(user_movie => user_movie.user_id.telegram_id == user_telegram_id)
             .map(
                 user_movie => {
                     let movie = user_movie.movie_id
@@ -90,7 +88,7 @@ class UserMovie {
         return UserMovie.saved
             .filter(
                 user_movie => user_movie.watched == watched
-                           && user_movie.user_id.telegram_id == user_telegram_id
+                    && user_movie.user_id.telegram_id == user_telegram_id
             )
             .map(
                 user_movie => {
@@ -106,17 +104,14 @@ class UserMovie {
      */
     static async findMovieListByUserTelegramIdAndScoreNotNull(user_telegram_id) {
         return UserMovie.saved
-        .filter(
-            user_movie => user_movie.score != null
-                       && user_movie.user_id.telegram_id == user_telegram_id
-        )
-        .map(
-            user_movie => {
-                let movie = user_movie.movie_id
-                movie.score = user_movie.score
-                return movie
-            }
-        )
+            .filter(user_movie => user_movie.score != null && user_movie.user_id.telegram_id == user_telegram_id)
+            .map(
+                user_movie => {
+                    let movie = user_movie.movie_id
+                    movie.score = user_movie.score
+                    return movie
+                }
+            )
     }
 
 }

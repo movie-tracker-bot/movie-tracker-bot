@@ -130,7 +130,7 @@ class MovieGenreRelation {
                         genres.push(genre)
                     }
                 )
-                await Promise.all(promises);
+                await Promise.all(promises)
             }
             db.close()
             return genres

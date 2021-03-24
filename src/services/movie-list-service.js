@@ -15,30 +15,26 @@ class MovieListService {
      *                              scored.
      */
     async getList(watched = null, scored = null) {
-        if (watched === null & scored === null) {
+        if (watched === null && scored === null) {
             return await UserMovie.findMovieListByUserTelegramId(this.user.telegram_id)
-        }
-        else if (watched != null){
+        } else if (watched != null) {
             return await UserMovie.findMovieListByUserTelegramIdAndWatched(this.user.telegram_id, watched)
-        }
-        else{
+        } else {
             const movie_list = await UserMovie.findMovieListByUserTelegramIdAndScoreNotNull(this.user.telegram_id)
             return MovieListService.sortByScore(movie_list)
         }
     }
-    
-    async findMoviesByTitle(title){
+
+    async findMoviesByTitle(title) {
         var titleToSearch = title.toLowerCase()
         var movieList = await UserMovie.findMovieListByUserTelegramId(this.user.telegram_id)
-        return movieList.filter( movie => movie.title === titleToSearch)
+        return movieList.filter(movie => movie.title === titleToSearch)
     }
 
-    async findMoviesByTitleAndYear(title, year){
+    async findMoviesByTitleAndYear(title, year) {
         var titleToSearch = title.toLowerCase()
         var movieList = await UserMovie.findMovieListByUserTelegramId(this.user.telegram_id)
-        return movieList
-                .filter(movie => movie.title === titleToSearch
-                                && movie.year == year)
+        return movieList.filter(movie => movie.title === titleToSearch && movie.year == year)
     }
 
     static sortByScore(movies) {
@@ -48,7 +44,7 @@ class MovieListService {
                 ranks.push(movie)
             }
         }
-        return ranks.sort((a, b) => Number(b.score) - Number(a.score) )
+        return ranks.sort((a, b) => Number(b.score) - Number(a.score))
     }
 }
 

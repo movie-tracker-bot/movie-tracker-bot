@@ -20,7 +20,7 @@ class Formatter {
         str = str.slice(0, n)
         return _.trim(str)
     }
-    
+
     static removeYear(string) {
         let year = Formatter.getYear(string)
         year = `(${year})`
@@ -81,16 +81,16 @@ class Formatter {
             return undefined
         }
         return string.split(' ')
-        .map(_.capitalize)
-        .join(' ');
+            .map(_.capitalize)
+            .join(' ')
     }
 
     static getYear(string) {
         const index = string.search(/[(][0-9][0-9][0-9][0-9][)]/g)
-        if (index < 0 ){
+        if (index < 0) {
             return null
         }
-        let year = string.slice(index+1,index+5)
+        let year = string.slice(index + 1, index + 5)
         return Number(year)
     }
 }

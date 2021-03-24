@@ -8,18 +8,18 @@ class User {
         this.telegram_id = telegram_id
         this.first_name = first_name
     }
-    
-    async createIfDoesntExist(){
-        try{
+
+    async createIfDoesntExist() {
+        try {
             var existingUser = await User.findByTelegramId(this.telegram_id)
-            if (!existingUser){
+            if (!existingUser) {
                 await this.save()
             }
-            else{
+            else {
                 this.telegram_id = existingUser.telegram_id
                 this.first_name = existingUser.first_name
             }
-        } catch(err){
+        } catch (err) {
             console.log(err)
             console.log('Error while checking user')
         }

@@ -105,8 +105,7 @@ class BotHandler {
         if (this.state[user] && this.state[user].next) {
             console.log('Dispatching to state handler...')
             await this.state[user].next(ctx)
-        }
-        else {
+        } else {
             console.log('No state for current user.')
             await ctx.reply('Sorry, I don\'t understand.')
         }
@@ -121,15 +120,12 @@ class BotHandler {
             if (!this.state[user].addUnlisted) {
                 await next()
                 return
-            }
-            else { //if this is called from other action
+            } else { //if this is called from other action
                 query = this.state[user].movieName
             }
-        }
-        else {
+        } else {
             query = ctx.match[1]
         }
-
 
         console.log(`Add command: ${query}`)
 
@@ -181,8 +177,7 @@ class BotHandler {
                 if (state.movie_list.length == state.movie_ix) {
                     await ctx.reply('Well, I ain\'t got any other suggestions...')
                     return true
-                }
-                else {
+                } else {
                     BotHandler.askMovieConfirmation(ctx, state)
                     return false
                 }
@@ -214,8 +209,7 @@ class BotHandler {
 
         if (movie.image) {
             await ctx.replyWithPhoto(movie.image.url)
-        }
-        else if (movie.poster_url) {
+        } else if (movie.poster_url) {
             await ctx.replyWithPhoto(movie.poster_url)
         }
         await ctx.reply('Is this the correct movie?')
@@ -283,8 +277,7 @@ class BotHandler {
         const genre = ctx.match[2]
 
         const userMovie = await (
-            genre
-                ? UserMovie.findUnwatchedRandomByTelegramIdAndGenre(user, genre)
+            genre ? UserMovie.findUnwatchedRandomByTelegramIdAndGenre(user, genre)
                 : UserMovie.findUnwatchedRandomByTelegramId(user)
         )
 
@@ -363,14 +356,12 @@ class BotHandler {
                     await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
                     delete this.state[userId]
                     return
-                }
-                else {
+                } else {
                     await ctx.reply(`This movie isn\'t on your list, I will first /add ${this.state[userId].movieName}`)
                     this.addMovie(ctx, next)
                     return
                 }
-            }
-            else {
+            } else {
                 var state = this.state[userId]
                 state.movie = movieList[0]
                 next(ctx, state)
@@ -526,15 +517,11 @@ class BotHandler {
         let movies = await getters[type]()
 
         if (genre) {
-            movies = movies.filter(
-                movie => movie.genreList.contains(genre)
-            )
+            movies = movies.filter(movie => movie.genreList.contains(genre))
         }
 
         if (movies.length == 0) {
-            await ctx.reply(
-                'There are no movies matching this criteria! You can add new movies using the /add comand'
-            )
+            await ctx.reply('There are no movies matching this criteria! You can add new movies using the /add comand')
             return
         }
 
@@ -545,14 +532,12 @@ class BotHandler {
                 const watched = movie.watched ? 1 : 0
                 response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)} (${movie.year}) - Your score: ${movie.score}\n`
             }
-        }
-        else {
+        } else {
             for (let movie of movies) {
                 const watched = movie.watched ? 1 : 0
                 response += `${watched_emojis[watched]} ${Formatter.toTitleCase(movie.title)} (${movie.year})\n`
             }
         }
-
 
         await ctx.reply(response)
     }
@@ -587,6 +572,7 @@ class BotHandler {
             await ctx.reply('To set a movie as watched, you must inform it\'s name')
             return
         }
+
         var movieName = ctx.match[1].toLowerCase()
         const movieYear = Formatter.getYear(ctx.match[1])
         if (movieYear) {
@@ -599,7 +585,6 @@ class BotHandler {
             addUnlisted: true
         }
         this.getMovie(ctx, this.setFoundMovieAsWatched.bind(this))
-
     }
 
     async setFoundMovieAsWatched(ctx, state) {
@@ -632,8 +617,7 @@ class BotHandler {
         if (this.state[userId]) { // Previous action is still ongoing.
             await next()
             return true
-        }
-        else {
+        } else {
             return false
         }
     }
