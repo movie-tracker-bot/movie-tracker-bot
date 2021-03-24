@@ -15,6 +15,21 @@ describe('Test Welcome Message', function () {
 
 })
 
+describe('Test Hekp Message', function () {
+    it('Test get help string', async function () {
+        const data = Menssages.helpMessage()
+        expect(data).toEqual(`Oh, I see you don't know what to do, let me review some comands for you:
+        /add + movie name -> to add a new movie in your list.
+        /remove + movie name -> to remove  a movie in your list.
+        /score + movie name + score -> to rate a movie
+        /watched + movie name -> to set a movie as watched
+        /list + (all|watched|unwatched|scored) + genre to list your movies
+        /rand to get a random recommendation
+        /myRank to see your rank`)
+    })
+
+})
+
 describe('Test Get Rank', function () {
     it('Test with valid string', async function () {
         const movieList = require('../services/__mocks__/movies-list.json')

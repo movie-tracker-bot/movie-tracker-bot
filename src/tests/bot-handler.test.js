@@ -12,18 +12,18 @@ jest.mock('../models/genre')
 jest.mock('../models/movie-genre-list')
 jest.mock('../services/imdb-service')
 
-class ContextMock{
-    constructor(id, match, text = null){
-        this.from = {id: id}
+class ContextMock {
+    constructor(id, match, text = null) {
+        this.from = { id: id }
         this.match = match
-        this.message = {text: text}
+        this.message = { text: text }
         this.replies = []
         this.photos = []
     }
-    async reply(string){
+    async reply(string) {
         this.replies.push(string)
     }
-    async replyWithPhoto(string){
+    async replyWithPhoto(string) {
         this.photos.push(string)
     }
 }
@@ -56,6 +56,15 @@ test(
         expect(replies.text).toEqual([])
 
         expect(Movie.saved.length).toEqual(0)
+    }
+)
+
+test(
+    'test help message',
+    async () => {
+        const replies = await telegraf.sendMessage('help')
+        expect(replies.text.length).toEqual(1)
+        expect(replies.text[0]).toEqual('Oh, I see you don\'t know what to do, let me review some comands for you:\n        /add + movie name -> to add a new movie in your list.\n        /remove + movie name -> to remove  a movie in your list.\n        /score + movie name + score -> to rate a movie\n        /watched + movie name -> to set a movie as watched\n        /list + (all|watched|unwatched|scored) + genre to list your movies\n        /rand to get a random recommendation\n        /myRank to see your rank')
     }
 )
 
@@ -189,7 +198,7 @@ test(
 )
 
 test('test add movie with addUnlisted',
-    async()=>{
+    async () => {
         let user = new User(0, 'random user')
         user.save()
         bot.state[user.telegram_id] = {
@@ -197,8 +206,8 @@ test('test add movie with addUnlisted',
             addUnlisted: true
         }
         let ctx = new ContextMock(user.telegram_id, [])
-        await bot.addMovie(ctx, (ctx, state)=>{ctx.wasCalled = true})
-        ctx = new ContextMock(user.telegram_id,[], 'yes')
+        await bot.addMovie(ctx, (ctx, state) => { ctx.wasCalled = true })
+        ctx = new ContextMock(user.telegram_id, [], 'yes')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies.length).toEqual(1)
         expect(ctx.wasCalled).toEqual(true)
@@ -447,7 +456,7 @@ test(
     }
 )
 
-test('test list scored', 
+test('test list scored',
     async () => {
         let replies = await telegraf.sendMessage('list all')
 
@@ -536,7 +545,7 @@ test(
 )
 
 test('set movie as watched without name',
-    async()=>{
+    async () => {
         let user = new User(0, 'random user')
         await user.save()
         let replies = await telegraf.sendMessage('/watched  ')
@@ -590,10 +599,10 @@ test(
     }
 )
 
-test('set movie as watched with previous action still ongoing', 
-    async()=>{
+test('set movie as watched with previous action still ongoing',
+    async () => {
         let user = new User(0, 'random user')
-        const next = async () =>{return}
+        const next = async () => { return }
         bot.state[user.telegram_id] = {
             next: next
         }
@@ -603,8 +612,8 @@ test('set movie as watched with previous action still ongoing',
         expect(replies.text.length).toEqual(0)
     })
 
-test('set found movie as watched', 
-    async ()=>{
+test('set found movie as watched',
+    async () => {
         let user = new User(12, 'random user')
         user.save()
 
@@ -612,22 +621,22 @@ test('set found movie as watched',
         movie.save()
         let userMovie = new UserMovie(1, user, movie, false, null)
         userMovie.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movie: movie
         }
 
         await bot.setFoundMovieAsWatched(ctx, bot.state[user.telegram_id])
-        expect(ctx.replies).toEqual(['Random Movie',"Do you want to set this movie as watched?"])
+        expect(ctx.replies).toEqual(['Random Movie', "Do you want to set this movie as watched?"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'yes')
+        ctx = new ContextMock(user.telegram_id, [], 'yes')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['The movie Random Movie is now set as watched!'])
     }
 )
 
-test('cancel set found movie as watched', 
-    async ()=>{
+test('cancel set found movie as watched',
+    async () => {
         let user = new User(12, 'random user')
         user.save()
 
@@ -635,27 +644,27 @@ test('cancel set found movie as watched',
         movie.save()
         let userMovie = new UserMovie(1, user, movie, false, null)
         userMovie.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movie: movie
         }
 
         await bot.setFoundMovieAsWatched(ctx, bot.state[user.telegram_id])
-        expect(ctx.replies).toEqual(['Random Movie',"Do you want to set this movie as watched?"])
+        expect(ctx.replies).toEqual(['Random Movie', "Do you want to set this movie as watched?"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'no')
+        ctx = new ContextMock(user.telegram_id, [], 'no')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['Ok! Random Movie will remain unwatched'])
 
-        ctx = new ContextMock(user.telegram_id,[])
+        ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movie: movie
         }
 
         await bot.setFoundMovieAsWatched(ctx, bot.state[user.telegram_id])
-        expect(ctx.replies).toEqual(['Random Movie',"Do you want to set this movie as watched?"])
+        expect(ctx.replies).toEqual(['Random Movie', "Do you want to set this movie as watched?"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'nvm')
+        ctx = new ContextMock(user.telegram_id, [], 'nvm')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['Cancelling...'])
     }
@@ -732,12 +741,12 @@ test('score movie with year',
         expect(replies.photos.length).toEqual(0)
         expect(bot.state[user.telegram_id].movieName).toEqual(movie.title)
         expect(bot.state[user.telegram_id].movieYear).toEqual(movie.year)
-        })
+    })
 
-test('set score with previous action still ongoing', 
-    async()=>{
+test('set score with previous action still ongoing',
+    async () => {
         let user = new User(0, 'random user')
-        const next = async () =>{return}
+        const next = async () => { return }
         bot.state[user.telegram_id] = {
             next: next
         }
@@ -749,7 +758,7 @@ test('set score with previous action still ongoing',
 
 test('test set score from movie',
     async () => {
-        
+
         let user = new User(12, 'random user')
         user.save()
 
@@ -757,39 +766,39 @@ test('test set score from movie',
         movie.save()
         let userMovie = new UserMovie(1, user, movie, false, null)
         userMovie.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movie: movie,
             score: 5
         }
         await bot.setScoreForMovie(ctx, bot.state[user.telegram_id])
-        expect(ctx.replies).toEqual(['Random Movie',"Do you want to set this movie\'s score to 5?"])
+        expect(ctx.replies).toEqual(['Random Movie', "Do you want to set this movie\'s score to 5?"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'yes')
+        ctx = new ContextMock(user.telegram_id, [], 'yes')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['Saved score 5 for Random Movie'])
 
-        ctx = new ContextMock(user.telegram_id,[])
+        ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movie: movie,
             score: 5
         }
         await bot.setScoreForMovie(ctx, bot.state[user.telegram_id])
-        expect(ctx.replies).toEqual(['Random Movie',"Do you want to set this movie\'s score to 5?"])
+        expect(ctx.replies).toEqual(['Random Movie', "Do you want to set this movie\'s score to 5?"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'no')
+        ctx = new ContextMock(user.telegram_id, [], 'no')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['Ok! This score won\'t be set to Random Movie'])
 
-        ctx = new ContextMock(user.telegram_id,[])
+        ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movie: movie,
             score: 5
         }
         await bot.setScoreForMovie(ctx, bot.state[user.telegram_id])
-        expect(ctx.replies).toEqual(['Random Movie',"Do you want to set this movie\'s score to 5?"])
+        expect(ctx.replies).toEqual(['Random Movie', "Do you want to set this movie\'s score to 5?"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'nvm')
+        ctx = new ContextMock(user.telegram_id, [], 'nvm')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['Cancelling...'])
     }
@@ -797,7 +806,7 @@ test('test set score from movie',
 
 test('test get movie with movie not on list',
     async () => {
-        
+
         let user = new User(0, 'random user')
         user.save()
 
@@ -806,19 +815,19 @@ test('test get movie with movie not on list',
 
         let userMovie = new UserMovie(1, user, movie, false, null)
         userMovie.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movieName: 'rando movie',
             score: 5
         }
-        await bot.getMovie(ctx,bot.setScoreForMovie.bind(bot))
+        await bot.getMovie(ctx, bot.setScoreForMovie.bind(bot))
         expect(ctx.replies).toEqual(['This movie isn\'t on your list, try adding it with the /add command'])
-        
+
     })
 
 test('test get movie with movie not on list and addUnlisted',
     async () => {
-        
+
         let user = new User(0, 'random user')
         user.save()
 
@@ -827,19 +836,19 @@ test('test get movie with movie not on list and addUnlisted',
 
         let userMovie = new UserMovie(1, user, movie, false, null)
         userMovie.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movieName: 'pulp fiction',
             addUnlisted: true
         }
-        await bot.getMovie(ctx,bot.setScoreForMovie.bind(bot))
+        await bot.getMovie(ctx, bot.setScoreForMovie.bind(bot))
         expect(ctx.replies[0]).toEqual('This movie isn\'t on your list, I will first /add pulp fiction')
-        
+
     })
 
 test('test get movie with movie on list',
     async () => {
-        
+
         let user = new User(12, 'random user')
         user.save()
 
@@ -848,22 +857,22 @@ test('test get movie with movie on list',
 
         let userMovie = new UserMovie(1, user, movie, false, null)
         userMovie.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movieName: 'random movie',
             score: 5
         }
-        await bot.getMovie(ctx,(ctx,state)=>{return})
+        await bot.getMovie(ctx, (ctx, state) => { return })
         expect(ctx.replies).toEqual([])
         expect(bot.state[user.telegram_id].movie.title).toEqual(movie.title)
         expect(bot.state[user.telegram_id].movie.id).toEqual(movie.id)
 
-        
+
     })
 
 test('test get movie with multiple matches movies on list',
     async () => {
-        
+
         let user = new User(12, 'random user')
         user.save()
 
@@ -875,32 +884,32 @@ test('test get movie with multiple matches movies on list',
         movie2.save()
         let userMovie2 = new UserMovie(1, user, movie2, false, null)
         userMovie2.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movieName: 'random movie',
             score: 5
         }
-        await bot.getMovie(ctx,(ctx,state)=>{return})
-        expect(ctx.replies).toEqual(['Random Movie',"Is this the correct movie?"])
+        await bot.getMovie(ctx, (ctx, state) => { return })
+        expect(ctx.replies).toEqual(['Random Movie', "Is this the correct movie?"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
 
-        ctx = new ContextMock(user.telegram_id,[], 'no')
+        ctx = new ContextMock(user.telegram_id, [], 'no')
         await bot.state[user.telegram_id].next(ctx)
-        expect(ctx.replies).toEqual(['Random Movie',"Is this the correct movie?"])
+        expect(ctx.replies).toEqual(['Random Movie', "Is this the correct movie?"])
         expect(ctx.photos).toEqual(['random movie image2.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'no')
+        ctx = new ContextMock(user.telegram_id, [], 'no')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['Well, I ain\'t got any other suggestions...'])
 
-        ctx = new ContextMock(user.telegram_id,[])
+        ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movieName: 'random movie',
             score: 5
         }
-        await bot.getMovie(ctx,(ctx,state)=>{return})
-        expect(ctx.replies).toEqual(['Random Movie',"Is this the correct movie?"])
+        await bot.getMovie(ctx, (ctx, state) => { return })
+        expect(ctx.replies).toEqual(['Random Movie', "Is this the correct movie?"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[],'yes')
+        ctx = new ContextMock(user.telegram_id, [], 'yes')
         await bot.state[user.telegram_id].next(ctx)
 
         expect(ctx.replies).toEqual([])
@@ -908,17 +917,17 @@ test('test get movie with multiple matches movies on list',
             movieName: 'random movie',
             score: 5
         }
-        await bot.getMovie(ctx,(ctx,state)=>{return})
-        expect(ctx.replies).toEqual(['Random Movie',"Is this the correct movie?"])
+        await bot.getMovie(ctx, (ctx, state) => { return })
+        expect(ctx.replies).toEqual(['Random Movie', "Is this the correct movie?"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[],'nvm')
+        ctx = new ContextMock(user.telegram_id, [], 'nvm')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['Cancelling...'])
     })
 
 test('test get movie with year',
     async () => {
-        
+
         let user = new User(12, 'random user')
         user.save()
 
@@ -930,22 +939,22 @@ test('test get movie with year',
         movie2.save()
         let userMovie2 = new UserMovie(1, user, movie2, false, null)
         userMovie2.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movieName: 'random movie',
             movieYear: 1337,
             score: 5
         }
-        await bot.getMovie(ctx,(ctx,state)=>{return})
+        await bot.getMovie(ctx, (ctx, state) => { return })
         expect(ctx.replies).toEqual([])
         expect(bot.state[user.telegram_id].movie.title).toEqual(movie.title)
         expect(bot.state[user.telegram_id].movie.id).toEqual(movie.id)
     })
-    
-test('wait previous action', 
-    async() =>{
+
+test('wait previous action',
+    async () => {
         let user = new User(0, 'random user')
-        const next = async () =>{return}
+        const next = async () => { return }
         user.save()
         let result = await bot.endPreviousAction(user.telegram_id, next)
         expect(result).toEqual(false)
@@ -957,8 +966,8 @@ test('wait previous action',
 
     })
 
-test('remove movie without name', 
-    async ()=>{
+test('remove movie without name',
+    async () => {
         let user = new User(0, 'random user')
         user.save()
 
@@ -975,7 +984,7 @@ test('remove movie without name',
     })
 
 test('remove movie with name',
-    async ()=>{
+    async () => {
         let user = new User(0, 'random user')
         user.save()
 
@@ -993,7 +1002,7 @@ test('remove movie with name',
     })
 
 test('remove movie with name and year',
-    async ()=>{
+    async () => {
         let user = new User(0, 'random user')
         user.save()
 
@@ -1011,10 +1020,10 @@ test('remove movie with name and year',
         expect(bot.state[user.telegram_id].movieYear).toEqual(movie.year)
     })
 
-test('remove movie with previous action still ongoing', 
-    async()=>{
+test('remove movie with previous action still ongoing',
+    async () => {
         let user = new User(0, 'random user')
-        const next = async () =>{return}
+        const next = async () => { return }
         bot.state[user.telegram_id] = {
             next: next
         }
@@ -1024,8 +1033,8 @@ test('remove movie with previous action still ongoing',
         expect(replies.text.length).toEqual(0)
     })
 
-test('remove found movie', 
-    async ()=>{
+test('remove found movie',
+    async () => {
         let user = new User(12, 'random user')
         user.save()
 
@@ -1033,21 +1042,21 @@ test('remove found movie',
         movie.save()
         let userMovie = new UserMovie(1, user, movie, false, null)
         userMovie.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movie: movie
         }
 
         await bot.removeFoundMovie(ctx, bot.state[user.telegram_id])
-        expect(ctx.replies).toEqual(['Random Movie',"Are you sure you want to remove this movie from your list? This action can\'t be undone"])
+        expect(ctx.replies).toEqual(['Random Movie', "Are you sure you want to remove this movie from your list? This action can\'t be undone"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'yes')
+        ctx = new ContextMock(user.telegram_id, [], 'yes')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['The movie Random Movie was removed from your list!'])
     })
 
-test('cancel remove found movie', 
-    async ()=>{
+test('cancel remove found movie',
+    async () => {
         let user = new User(12, 'random user')
         user.save()
 
@@ -1055,27 +1064,27 @@ test('cancel remove found movie',
         movie.save()
         let userMovie = new UserMovie(1, user, movie, false, null)
         userMovie.save()
-        let ctx = new ContextMock(user.telegram_id,[])
+        let ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movie: movie
         }
 
         await bot.removeFoundMovie(ctx, bot.state[user.telegram_id])
-        expect(ctx.replies).toEqual(['Random Movie',"Are you sure you want to remove this movie from your list? This action can\'t be undone"])
+        expect(ctx.replies).toEqual(['Random Movie', "Are you sure you want to remove this movie from your list? This action can\'t be undone"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'no')
+        ctx = new ContextMock(user.telegram_id, [], 'no')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['Ok! Random Movie will remain on your list'])
-        
-        ctx = new ContextMock(user.telegram_id,[])
+
+        ctx = new ContextMock(user.telegram_id, [])
         bot.state[user.telegram_id] = {
             movie: movie
         }
 
         await bot.removeFoundMovie(ctx, bot.state[user.telegram_id])
-        expect(ctx.replies).toEqual(['Random Movie',"Are you sure you want to remove this movie from your list? This action can\'t be undone"])
+        expect(ctx.replies).toEqual(['Random Movie', "Are you sure you want to remove this movie from your list? This action can\'t be undone"])
         expect(ctx.photos).toEqual(['random movie image.jpg'])
-        ctx = new ContextMock(user.telegram_id,[], 'nvm')
+        ctx = new ContextMock(user.telegram_id, [], 'nvm')
         await bot.state[user.telegram_id].next(ctx)
         expect(ctx.replies).toEqual(['Cancelling...'])
     }

@@ -66,6 +66,14 @@ class BotHandler {
                 pattern: /^ *[/]?myRank$/i,
                 handler: this.getRank,
             },
+            help: {
+                pattern: /^ *[/]?help$/i,
+                handler: this.getHelp,
+            },
+            ajuda: {
+                pattern: /^ *[/]?ajuda$/i,
+                handler: this.getHelp,
+            },
         }
 
         for (let endpoint of Object.values(this.handlers)) {
@@ -110,28 +118,28 @@ class BotHandler {
         let query = ''
 
         if (this.state[user]) { // Previous action is still ongoing.
-            if(!this.state[user].addUnlisted){
+            if (!this.state[user].addUnlisted) {
                 await next()
                 return
             }
-            else{ //if this is called from other action
+            else { //if this is called from other action
                 query = this.state[user].movieName
             }
         }
-        else{
+        else {
             query = ctx.match[1]
         }
-        
+
 
         console.log(`Add command: ${query}`)
 
-        if (!this.state[user]){
+        if (!this.state[user]) {
             this.state[user] = {}
         }
         const state = this.state[user]
         state.movie_ix = 0
         state.movie_list = await ImdbService.getMovieByTitle(query)
-    
+
 
         BotHandler.askMovieConfirmation(ctx, state)
 
@@ -159,8 +167,8 @@ class BotHandler {
                 }
 
                 await ctx.reply(`Got it! ${Formatter.toTitleCase(movie.title)} added to your list!`)
-                
-                if (state.addUnlisted){
+
+                if (state.addUnlisted) {
                     state.movie = movieDAO
                     next(ctx, state)
                 }
@@ -187,6 +195,17 @@ class BotHandler {
         )
     }
 
+    async getHelp(ctx, next) {
+        const user = ctx.from.id
+
+        if (await this.endPreviousAction(user, next)) {
+            return
+        }
+        console.log('Get help command')
+
+        await ctx.reply(Menssages.helpMessage())
+    }
+
 
     static async askMovieConfirmation(ctx, state) {
         const movie = state.movie_list[state.movie_ix]
@@ -196,7 +215,7 @@ class BotHandler {
         if (movie.image) {
             await ctx.replyWithPhoto(movie.image.url)
         }
-        else if(movie.poster_url){
+        else if (movie.poster_url) {
             await ctx.replyWithPhoto(movie.poster_url)
         }
         await ctx.reply('Is this the correct movie?')
@@ -290,33 +309,33 @@ class BotHandler {
         }
     }
 
-    async getMovie(ctx, next){
-        try{
+    async getMovie(ctx, next) {
+        try {
             var userId = ctx.from.id
             const user = await User.findByTelegramId(userId)
             const movieListService = new MovieListService(user)
-            
-            if (!this.state[userId].movieYear){
+
+            if (!this.state[userId].movieYear) {
                 var movieList = await movieListService.findMoviesByTitle(this.state[userId].movieName)
-                if (movieList.length > 1){
+                if (movieList.length > 1) {
                     this.state[userId].movie_ix = 0
                     this.state[userId].movie_list = movieList
                     const state = this.state[userId]
                     await BotHandler.askMovieConfirmation(ctx, state)
                     state.next = this.confirm.bind(
                         this,
-            
+
                         async (ctx, state) => {
                             var movie = state.movie_list[state.movie_ix]
-                            
+
                             state.movie = movie
                             next(ctx, state)
                             return true
                         },
-            
+
                         async (ctx, state) => {
                             state.movie_ix++
-            
+
                             if (state.movie_list.length == state.movie_ix) {
                                 await ctx.reply('Well, I ain\'t got any other suggestions...')
                                 return true
@@ -326,7 +345,7 @@ class BotHandler {
                                 return false
                             }
                         },
-            
+
                         async (ctx, state) => {
                             await ctx.reply('Cancelling...')
                             return true
@@ -334,30 +353,30 @@ class BotHandler {
                     )
                     return
                 }
-                
+
             }
-            else{
+            else {
                 var movieList = await movieListService.findMoviesByTitleAndYear(this.state[userId].movieName, this.state[userId].movieYear)
             }
             if (!movieList.length) {
-                if(!this.state[userId].addUnlisted){
+                if (!this.state[userId].addUnlisted) {
                     await ctx.reply('This movie isn\'t on your list, try adding it with the /add command')
                     delete this.state[userId]
                     return
                 }
-                else{
+                else {
                     await ctx.reply(`This movie isn\'t on your list, I will first /add ${this.state[userId].movieName}`)
                     this.addMovie(ctx, next)
                     return
                 }
             }
-            else{
+            else {
                 var state = this.state[userId]
                 state.movie = movieList[0]
                 next(ctx, state)
                 return
             }
-        }catch(err){
+        } catch (err) {
             console.log('An error occurred while geting movie from user')
             throw err
         }
@@ -373,7 +392,7 @@ class BotHandler {
         var movieName = Formatter.removeScore(ctx.match[1])
         const score = Formatter.getNumberOfString(ctx.match[1])
         const movieYear = Formatter.getYear(ctx.match[1])
-        if(movieYear){
+        if (movieYear) {
             movieName = Formatter.removeYear(movieName)
         }
 
@@ -390,10 +409,10 @@ class BotHandler {
             score: score,
             addUnlisted: true
         }
-        this.getMovie(ctx, this.setScoreForMovie.bind(this))   
+        this.getMovie(ctx, this.setScoreForMovie.bind(this))
     }
 
-    async setScoreForMovie(ctx, state){
+    async setScoreForMovie(ctx, state) {
         const id = ctx.from.id
         const movie = state.movie
         const score = state.score
@@ -422,7 +441,7 @@ class BotHandler {
     async removeMovie(ctx, next) {
         const id = ctx.from.id
 
-        if (await this.endPreviousAction(id, next)){
+        if (await this.endPreviousAction(id, next)) {
             return
         }
 
@@ -432,7 +451,7 @@ class BotHandler {
         }
         var movieName = ctx.match[1]
         const movieYear = Formatter.getYear(ctx.match[1])
-        if(movieYear){
+        if (movieYear) {
             movieName = Formatter.removeYear(movieName)
         }
 
@@ -441,13 +460,13 @@ class BotHandler {
             movieYear: movieYear,
         }
         this.getMovie(ctx, this.removeFoundMovie.bind(this))
-       
+
     }
 
-    async removeFoundMovie(ctx, state){
+    async removeFoundMovie(ctx, state) {
         const user = ctx.from.id
         const movie = state.movie
-        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(user,movie.id)
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(user, movie.id)
         await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, 'Are you sure you want to remove this movie from your list? This action can\'t be undone')
 
         this.state[user] = {}
@@ -570,7 +589,7 @@ class BotHandler {
         }
         var movieName = ctx.match[1].toLowerCase()
         const movieYear = Formatter.getYear(ctx.match[1])
-        if(movieYear){
+        if (movieYear) {
             movieName = Formatter.removeYear(movieName)
         }
 
@@ -583,10 +602,10 @@ class BotHandler {
 
     }
 
-    async setFoundMovieAsWatched(ctx, state){
+    async setFoundMovieAsWatched(ctx, state) {
         const userId = ctx.from.id
         const movie = state.movie
-        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(userId,movie.id)
+        const userMovie = await UserMovie.findByUserTelegramIdAndMovieId(userId, movie.id)
 
         await BotHandler.askMovieFromDatabaseConfirmation(ctx, movie, 'Do you want to set this movie as watched?')
         this.state[userId] = {}
@@ -609,12 +628,12 @@ class BotHandler {
         )
     }
 
-    async endPreviousAction(userId, next){
+    async endPreviousAction(userId, next) {
         if (this.state[userId]) { // Previous action is still ongoing.
             await next()
             return true
         }
-        else{
+        else {
             return false
         }
     }
